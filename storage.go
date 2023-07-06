@@ -5,7 +5,7 @@
 //   - abi of the smartcontract
 //   - smartcontract is the smartcontract linked to the abi.
 //   - configuration is the Topic linked to the smartcontract.
-package storage
+package main
 
 import (
 	"github.com/blocklords/sds/common/data_type/database"
