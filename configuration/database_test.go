@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	database "github.com/Seascape-Foundation/mysql-seascape-extension"
 	"github.com/Seascape-Foundation/sds-common-lib/blockchain"
 	"github.com/Seascape-Foundation/sds-common-lib/smartcontract_key"
 	"github.com/Seascape-Foundation/sds-common-lib/topic"
@@ -14,9 +15,8 @@ import (
 	parameter "github.com/Seascape-Foundation/sds-service-lib/identity"
 	"github.com/Seascape-Foundation/sds-service-lib/log"
 	"github.com/Seascape-Foundation/sds-service-lib/remote"
-	"github.com/blocklords/sds/database"
-	"github.com/blocklords/sds/storage/abi"
-	"github.com/blocklords/sds/storage/smartcontract"
+	"github.com/Seascape-Foundation/static-seascape-service/abi"
+	"github.com/Seascape-Foundation/static-seascape-service/smartcontract"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
 )
@@ -28,88 +28,88 @@ import (
 // returns the current testing context
 type TestConfigurationDbSuite struct {
 	suite.Suite
-	db_name       string
+	dbName        string
 	configuration Configuration
 	container     *mysql.MySQLContainer
-	db_con        *remote.ClientSocket
+	dbCon         *remote.ClientSocket
 	ctx           context.Context
 }
 
 func (suite *TestConfigurationDbSuite) SetupTest() {
 	// prepare the database creation
-	suite.db_name = "test"
+	suite.dbName = "test"
 	_, filename, _, _ := runtime.Caller(0)
 	// configuration depends on smartcontract.
 	// smartcontract depends on abi.
-	file_dir := filepath.Dir(filename)
-	storage_abi := "20230308171023_storage_abi.sql"
-	storage_smartcontract := "20230308173919_storage_smartcontract.sql"
-	storage_configuration := "20230308173943_storage_configuration.sql"
-	change_group_type := "20230314150414_storage_configuration_group_type.sql"
+	fileDir := filepath.Dir(filename)
+	storageAbi := "20230308171023_storage_abi.sql"
+	storageSmartcontract := "20230308173919_storage_smartcontract.sql"
+	storageConfiguration := "20230308173943_storage_configuration.sql"
+	changeGroupType := "20230314150414_storage_configuration_group_type.sql"
 
-	abi_sql_path := filepath.Join(file_dir, "..", "..", "_db", "migrations", storage_abi)
-	smartcontract_sql_path := filepath.Join(file_dir, "..", "..", "_db", "migrations", storage_smartcontract)
-	configuration_sql_path := filepath.Join(file_dir, "..", "..", "_db", "migrations", storage_configuration)
-	change_group_path := filepath.Join(file_dir, "..", "..", "_db", "migrations", change_group_type)
+	abiSqlPath := filepath.Join(fileDir, "..", "..", "_db", "migrations", storageAbi)
+	smartcontractSqlPath := filepath.Join(fileDir, "..", "..", "_db", "migrations", storageSmartcontract)
+	configurationSqlPath := filepath.Join(fileDir, "..", "..", "_db", "migrations", storageConfiguration)
+	changeGroupPath := filepath.Join(fileDir, "..", "..", "_db", "migrations", changeGroupType)
 
-	suite.T().Log("the configuration table path", configuration_sql_path)
+	suite.T().Log("the configuration table path", configurationSqlPath)
 
 	// run the container
 	ctx := context.TODO()
 	container, err := mysql.RunContainer(ctx,
-		mysql.WithDatabase(suite.db_name),
+		mysql.WithDatabase(suite.dbName),
 		mysql.WithUsername("root"),
 		mysql.WithPassword("tiger"),
-		mysql.WithScripts(abi_sql_path, smartcontract_sql_path, configuration_sql_path, change_group_path),
+		mysql.WithScripts(abiSqlPath, smartcontractSqlPath, configurationSqlPath, changeGroupPath),
 	)
 	suite.Require().NoError(err)
 	suite.container = container
 	suite.ctx = ctx
 
-	logger, err := log.New("mysql-suite", log.WITHOUT_TIMESTAMP)
+	logger, err := log.New("mysql-suite", false)
 	suite.Require().NoError(err)
-	app_config, err := configuration.NewAppConfig(logger)
+	appConfig, err := configuration.NewAppConfig(logger)
 	suite.Require().NoError(err)
 
 	// Creating a database client
 	// after settings the default parameters
 	// we should have the user name and password
-	app_config.SetDefaults(database.DatabaseConfigurations)
+	appConfig.SetDefaults(database.DatabaseConfigurations)
 
 	// Overwrite the default parameters to use test container
 	host, err := container.Host(ctx)
 	suite.Require().NoError(err)
 	ports, err := container.Ports(ctx)
 	suite.Require().NoError(err)
-	exposed_port := ports["3306/tcp"][0].HostPort
+	exposedPort := ports["3306/tcp"][0].HostPort
 
 	database.DatabaseConfigurations.Parameters["SDS_DATABASE_HOST"] = host
-	database.DatabaseConfigurations.Parameters["SDS_DATABASE_PORT"] = exposed_port
-	database.DatabaseConfigurations.Parameters["SDS_DATABASE_NAME"] = suite.db_name
+	database.DatabaseConfigurations.Parameters["SDS_DATABASE_PORT"] = exposedPort
+	database.DatabaseConfigurations.Parameters["SDS_DATABASE_NAME"] = suite.dbName
 
-	go database.Run(app_config, logger)
+	//go database.Run(appConfig, logger)
 	// wait for initiation of the controller
 	time.Sleep(time.Second * 1)
 
-	database_service, err := parameter.Inprocess(parameter.DATABASE)
+	database_service, err := parameter.Inprocess("database")
 	suite.Require().NoError(err)
-	client, err := remote.InprocRequestSocket(database_service.Url(), logger, app_config)
+	client, err := remote.InprocRequestSocket(database_service.Url(), logger, appConfig)
 	suite.Require().NoError(err)
 
-	suite.db_con = client
+	suite.dbCon = client
 
 	// add the storage abi
-	abi_id := "base64="
-	sample_abi := abi.Abi{
+	abiId := "base64="
+	sampleAbi := abi.Abi{
 		Bytes: []byte("[{}]"),
-		Id:    abi_id,
+		Id:    abiId,
 	}
-	err = sample_abi.Insert(suite.db_con)
+	err = sampleAbi.Insert(suite.dbCon)
 	suite.Require().NoError(err)
 
 	// add the storage smartcontract
 	key, _ := smartcontract_key.New("1", "0xaddress")
-	tx_key := blockchain.TransactionKey{
+	txKey := blockchain.TransactionKey{
 		Id:    "0xtx_id",
 		Index: 0,
 	}
@@ -118,12 +118,12 @@ func (suite *TestConfigurationDbSuite) SetupTest() {
 
 	sm := smartcontract.Smartcontract{
 		SmartcontractKey: key,
-		AbiId:            abi_id,
-		TransactionKey:   tx_key,
+		AbiId:            abiId,
+		TransactionKey:   txKey,
 		BlockHeader:      header,
 		Deployer:         deployer,
 	}
-	err = sm.Insert(suite.db_con)
+	err = sm.Insert(suite.dbCon)
 	suite.Require().NoError(err)
 
 	sample := topic.Topic{
@@ -142,7 +142,7 @@ func (suite *TestConfigurationDbSuite) SetupTest() {
 		if err := container.Terminate(ctx); err != nil {
 			suite.T().Fatalf("failed to terminate container: %s", err)
 		}
-		if err := suite.db_con.Close(); err != nil {
+		if err := suite.dbCon.Close(); err != nil {
 			suite.T().Fatalf("failed to terminate database connection: %s", err)
 		}
 	})
@@ -151,14 +151,14 @@ func (suite *TestConfigurationDbSuite) SetupTest() {
 func (suite *TestConfigurationDbSuite) TestConfiguration() {
 	var configs []*Configuration
 
-	err := suite.configuration.SelectAll(suite.db_con, &configs)
+	err := suite.configuration.SelectAll(suite.dbCon, &configs)
 	suite.Require().NoError(err)
 	suite.Require().Len(configs, 0)
 
-	err = suite.configuration.Insert(suite.db_con)
+	err = suite.configuration.Insert(suite.dbCon)
 	suite.Require().NoError(err)
 
-	err = suite.configuration.SelectAll(suite.db_con, &configs)
+	err = suite.configuration.SelectAll(suite.dbCon, &configs)
 	suite.Require().NoError(err)
 	suite.Require().Len(configs, 1)
 	suite.Require().EqualValues(suite.configuration, *configs[0])
@@ -173,11 +173,11 @@ func (suite *TestConfigurationDbSuite) TestConfiguration() {
 		Group:         "test-suite",
 		Smartcontract: "TestToken",
 	}
-	configuration := Configuration{
+	conf := Configuration{
 		Topic:   sample,
 		Address: "not_inserted",
 	}
-	err = configuration.Insert(suite.db_con)
+	err = conf.Insert(suite.dbCon)
 	suite.Require().Error(err)
 }
 

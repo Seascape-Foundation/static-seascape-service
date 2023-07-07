@@ -3,16 +3,17 @@ package abi
 import (
 	"fmt"
 
+	"github.com/Seascape-Foundation/mysql-seascape-extension/handler"
 	"github.com/Seascape-Foundation/sds-common-lib/data_type"
 	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
 	"github.com/Seascape-Foundation/sds-service-lib/remote"
-	"github.com/blocklords/sds/database/handler"
 )
 
 // Insert into database
 //
 // Implements common/data_type/database.Crud interface
-func (a *Abi) Insert(db *remote.ClientSocket) error {
+func (a *Abi) Insert(dbInterface interface{}) error {
+	db := dbInterface.(*remote.ClientSocket)
 	request := handler.DatabaseQueryRequest{
 		Fields:    []string{"abi_id", "body"},
 		Tables:    []string{"abi"},
@@ -30,8 +31,9 @@ func (a *Abi) Insert(db *remote.ClientSocket) error {
 // SelectAll abi from database
 //
 // Implements common/data_type/database.Crud interface
-func (a *Abi) SelectAll(db_client *remote.ClientSocket, return_values interface{}) error {
-	abis, ok := return_values.(*[]*Abi)
+func (a *Abi) SelectAll(dbInterface interface{}, returnValues interface{}) error {
+	dbClient := dbInterface.(*remote.ClientSocket)
+	abis, ok := returnValues.(*[]*Abi)
 	if !ok {
 		return fmt.Errorf("return_values.(*[]*Abi)")
 	}
@@ -42,7 +44,7 @@ func (a *Abi) SelectAll(db_client *remote.ClientSocket, return_values interface{
 	}
 	var reply handler.SelectAllReply
 
-	err := handler.SELECT_ALL.Request(db_client, request, &reply)
+	err := handler.SelectAll.Request(dbClient, request, &reply)
 	if err != nil {
 		return fmt.Errorf("handler.SELECT_ALL.Push: %w", err)
 	}
@@ -52,39 +54,39 @@ func (a *Abi) SelectAll(db_client *remote.ClientSocket, return_values interface{
 	for i, raw := range reply.Rows {
 		abi, err := New(raw)
 		if err != nil {
-			return fmt.Errorf("New Abi from database result: %w", err)
+			return fmt.Errorf("new Abi from database result: %w", err)
 		}
 		(*abis)[i] = abi
 	}
-	return_values = abis
+	returnValues = abis
 
 	return err
 }
 
-// Not implemented common/data_type/database.Crud interface
+// Select Not implemented common/data_type/database.Crud interface
 //
 // Returns an error
-func (b *Abi) Select(_ *remote.ClientSocket) error {
+func (a *Abi) Select(_ interface{}, _ interface{}) error {
 	return fmt.Errorf("not implemented")
 }
 
-// Not implemented common/data_type/database.Crud interface
+// SelectAllByCondition Not implemented common/data_type/database.Crud interface
 //
 // Returns an error
-func (b *Abi) SelectAllByCondition(_ *remote.ClientSocket, _ key_value.KeyValue, _ interface{}) error {
+func (a *Abi) SelectAllByCondition(_ interface{}, _ key_value.KeyValue, _ interface{}) error {
 	return fmt.Errorf("not implemented")
 }
 
-// Not implemented common/data_type/database.Crud interface
+// Exist Not implemented common/data_type/database.Crud interface
 //
 // Returns an error
-func (b *Abi) Exist(_ *remote.ClientSocket) bool {
+func (a *Abi) Exist(_ interface{}) bool {
 	return false
 }
 
-// Not implemented common/data_type/database.Crud interface
+// Update Not implemented common/data_type/database.Crud interface
 //
 // Returns an error
-func (b *Abi) Update(_ *remote.ClientSocket, _ uint8) error {
+func (a *Abi) Update(_ interface{}, _ uint8) error {
 	return fmt.Errorf("not implemented")
 }

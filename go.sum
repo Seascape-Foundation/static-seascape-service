@@ -44,6 +44,8 @@ github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3
 github.com/Microsoft/go-winio v0.6.0 h1:slsWYD/zyx7lCXoZVlvQrj0hPTM1HI4+v1sIda2yDvg=
 github.com/Microsoft/go-winio v0.6.0/go.mod h1:cTAf44im0RAYeL23bpB+fzCyDH2MJiz2BO69KH/soAE=
 github.com/Microsoft/hcsshim v0.10.0-rc.7 h1:HBytQPxcv8Oy4244zbQbe6hnOnx544eL5QPUqhJldz8=
+github.com/Seascape-Foundation/mysql-seascape-extension v0.0.0-20230707132050-a36b3833e576 h1:6tgnMvyFqLRUJxvhH2bkR2BRYiSYMNzOMxICdqyAeW4=
+github.com/Seascape-Foundation/mysql-seascape-extension v0.0.0-20230707132050-a36b3833e576/go.mod h1:Uq/Cif/swH0sCGcuA2YIls26L0RvyMzT+hdIfIDHD1s=
 github.com/Seascape-Foundation/sds-common-lib v0.0.0-20230706114026-ffdae7101871 h1:9N/x5TJMov8ES98aUdSL7xkxyjyErYkkNR075VuXE1Y=
 github.com/Seascape-Foundation/sds-common-lib v0.0.0-20230706114026-ffdae7101871/go.mod h1:+6kCuE/i7d+cuGHpXddC92quNJ0vSoKq5UXm7BuwwoU=
 github.com/Seascape-Foundation/sds-service-lib v0.0.0-20230706124111-40083a479bba h1:KGFGS5u18pZ5tv3jxEV9qmt9pnTd1heM+7KzN/ICRnI=

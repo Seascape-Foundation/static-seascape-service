@@ -3,17 +3,18 @@ package smartcontract
 import (
 	"fmt"
 
+	"github.com/Seascape-Foundation/mysql-seascape-extension/handler"
 	"github.com/Seascape-Foundation/sds-common-lib/blockchain"
 	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
 	"github.com/Seascape-Foundation/sds-common-lib/smartcontract_key"
 	"github.com/Seascape-Foundation/sds-service-lib/remote"
-	"github.com/blocklords/sds/database/handler"
 )
 
-// Inserts the smartcontract into the database
+// Insert Inserts the smartcontract into the database
 //
 // Implements common/data_type/database.Crud interface
-func (sm *Smartcontract) Insert(db *remote.ClientSocket) error {
+func (sm *Smartcontract) Insert(dbInterface interface{}) error {
+	db := dbInterface.(*remote.ClientSocket)
 	request := handler.DatabaseQueryRequest{
 		Fields: []string{"network_id",
 			"address",
@@ -47,8 +48,10 @@ func (sm *Smartcontract) Insert(db *remote.ClientSocket) error {
 // SelectAll smartcontracts from database
 //
 // Implements common/data_type/database.Crud interface
-func (sm *Smartcontract) SelectAll(db *remote.ClientSocket, return_values interface{}) error {
-	smartcontracts, ok := return_values.(*[]*Smartcontract)
+func (sm *Smartcontract) SelectAll(dbInterface interface{}, returnValues interface{}) error {
+	db := dbInterface.(*remote.ClientSocket)
+
+	smartcontracts, ok := returnValues.(*[]*Smartcontract)
 	if !ok {
 		return fmt.Errorf("return_values.(*[]*Smartcontract)")
 	}
@@ -68,7 +71,7 @@ func (sm *Smartcontract) SelectAll(db *remote.ClientSocket, return_values interf
 	}
 	var reply handler.SelectAllReply
 
-	err := handler.SELECT_ALL.Request(db, request, &reply)
+	err := handler.SelectAll.Request(db, request, &reply)
 	if err != nil {
 		return fmt.Errorf("handler.SELECT_ALL.Request: %w", err)
 	}
@@ -83,17 +86,17 @@ func (sm *Smartcontract) SelectAll(db *remote.ClientSocket, return_values interf
 			BlockHeader:      blockchain.BlockHeader{},
 		}
 
-		err := raw.ToInterface(&sm.SmartcontractKey)
+		err := raw.Interface(&sm.SmartcontractKey)
 		if err != nil {
 			return fmt.Errorf("raw.ToInterface(SmartcontractKey): %w", err)
 		}
 
-		err = raw.ToInterface(&sm.BlockHeader)
+		err = raw.Interface(&sm.BlockHeader)
 		if err != nil {
 			return fmt.Errorf("raw.ToInterface(BlockHeader): %w", err)
 		}
 
-		err = raw.ToInterface(&sm.TransactionKey)
+		err = raw.Interface(&sm.TransactionKey)
 		if err != nil {
 			return fmt.Errorf("raw.ToInterface(TransactionKey): %w", err)
 		}
@@ -104,44 +107,44 @@ func (sm *Smartcontract) SelectAll(db *remote.ClientSocket, return_values interf
 		}
 		sm.Deployer = deployer
 
-		abi_id, err := raw.GetString("abi_id")
+		abiId, err := raw.GetString("abi_id")
 		if err != nil {
 			return fmt.Errorf("failed to extract abi id from database result: %w", err)
 		}
-		sm.AbiId = abi_id
+		sm.AbiId = abiId
 
 		(*smartcontracts)[i] = &sm
 	}
 
-	return_values = smartcontracts
+	returnValues = smartcontracts
 
 	return err
 }
 
-// Not implemented common/data_type/database.Crud interface
+// Select Not implemented common/data_type/database.Crud interface
 //
 // Returns an error
-func (sm *Smartcontract) Select(_ *remote.ClientSocket) error {
+func (sm *Smartcontract) Select(_ interface{}, _ interface{}) error {
 	return fmt.Errorf("not implemented")
 }
 
-// Not implemented common/data_type/database.Crud interface
+// SelectAllByCondition Not implemented common/data_type/database.Crud interface
 //
 // Returns an error
-func (sm *Smartcontract) SelectAllByCondition(_ *remote.ClientSocket, _ key_value.KeyValue, _ interface{}) error {
+func (sm *Smartcontract) SelectAllByCondition(_ interface{}, _ key_value.KeyValue, _ interface{}) error {
 	return fmt.Errorf("not implemented")
 }
 
-// Not implemented common/data_type/database.Crud interface
+// Exist Not implemented common/data_type/database.Crud interface
 //
 // Returns an error
-func (sm *Smartcontract) Exist(_ *remote.ClientSocket) bool {
+func (sm *Smartcontract) Exist(_ interface{}) bool {
 	return false
 }
 
-// Not implemented common/data_type/database.Crud interface
+// Update Not implemented common/data_type/database.Crud interface
 //
 // Returns an error
-func (sm *Smartcontract) Update(_ *remote.ClientSocket, _ uint8) error {
+func (sm *Smartcontract) Update(_ interface{}, _ uint8) error {
 	return fmt.Errorf("not implemented")
 }

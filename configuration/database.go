@@ -3,23 +3,24 @@ package configuration
 import (
 	"fmt"
 
+	"github.com/Seascape-Foundation/mysql-seascape-extension/handler"
 	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
 	"github.com/Seascape-Foundation/sds-common-lib/topic"
 	"github.com/Seascape-Foundation/sds-service-lib/remote"
-	"github.com/blocklords/sds/database/handler"
 )
 
-// Inserts the configuration into the database
+// Insert Inserts the configuration into the database
 //
-// It doesn't validates the configuration.
+// It doesn't validate the configuration.
 // Call conf.Validate() before calling this
 //
 // Implements common/data_type/database.Crud interface
-func (conf *Configuration) Insert(db *remote.ClientSocket) error {
+func (c *Configuration) Insert(dbInterface interface{}) error {
+	db := dbInterface.(*remote.ClientSocket)
 	request := handler.DatabaseQueryRequest{
 		Fields:    []string{"organization", "project", "network_id", "group_name", "smartcontract_name", "address"},
 		Tables:    []string{"configuration"},
-		Arguments: []interface{}{conf.Topic.Organization, conf.Topic.Project, conf.Topic.NetworkId, conf.Topic.Group, conf.Topic.Smartcontract, conf.Address},
+		Arguments: []interface{}{c.Topic.Organization, c.Topic.Project, c.Topic.NetworkId, c.Topic.Group, c.Topic.Smartcontract, c.Address},
 	}
 	var reply handler.InsertReply
 
@@ -33,8 +34,10 @@ func (conf *Configuration) Insert(db *remote.ClientSocket) error {
 // SelectAll configurations from database
 //
 // Implements common/data_type/database.Crud interface
-func (conf *Configuration) SelectAll(db *remote.ClientSocket, return_values interface{}) error {
-	confs, ok := return_values.(*[]*Configuration)
+func (c *Configuration) SelectAll(dbInterface interface{}, returnValues interface{}) error {
+	db := dbInterface.(*remote.ClientSocket)
+
+	configurations, ok := returnValues.(*[]*Configuration)
 	if !ok {
 		return fmt.Errorf("return_values.(*[]*Configuration)")
 	}
@@ -52,16 +55,16 @@ func (conf *Configuration) SelectAll(db *remote.ClientSocket, return_values inte
 	}
 	var reply handler.SelectAllReply
 
-	err := handler.SELECT_ALL.Request(db, request, &reply)
+	err := handler.SelectAll.Request(db, request, &reply)
 	if err != nil {
 		return fmt.Errorf("handler.SELECT_ALL.Request: %w", err)
 	}
 
-	*confs = make([]*Configuration, len(reply.Rows))
+	*configurations = make([]*Configuration, len(reply.Rows))
 
 	// Loop through rows, using Scan to assign column data to struct fields.
 	for i, raw := range reply.Rows {
-		conf_topic, err := topic.ParseJSON(raw)
+		confTopic, err := topic.ParseJSON(raw)
 		if err != nil {
 			return fmt.Errorf("parsing topic parameters from database result failed: %w", err)
 		}
@@ -69,41 +72,41 @@ func (conf *Configuration) SelectAll(db *remote.ClientSocket, return_values inte
 		if err != nil {
 			return fmt.Errorf("parsing address parameter from database result failed: %w", err)
 		}
-		conf, err := NewFromTopic(*conf_topic, address)
+		conf, err := NewFromTopic(*confTopic, address)
 		if err != nil {
 			return fmt.Errorf("NewFromTopic: %w", err)
 		}
-		(*confs)[i] = conf
+		(*configurations)[i] = conf
 	}
-	return_values = confs
+	returnValues = configurations
 
 	return err
 }
 
-// Not implemented common/data_type/database.Crud interface
+// Select Not implemented common/data_type/database.Crud interface
 //
 // Returns an error
-func (conf *Configuration) Select(_ *remote.ClientSocket) error {
+func (c *Configuration) Select(_ interface{}, _ interface{}) error {
 	return fmt.Errorf("not implemented")
 }
 
-// Not implemented common/data_type/database.Crud interface
+// SelectAllByCondition Not implemented common/data_type/database.Crud interface
 //
 // Returns an error
-func (conf *Configuration) SelectAllByCondition(_ *remote.ClientSocket, _ key_value.KeyValue, _ interface{}) error {
+func (c *Configuration) SelectAllByCondition(_ interface{}, _ key_value.KeyValue, _ interface{}) error {
 	return fmt.Errorf("not implemented")
 }
 
-// Not implemented common/data_type/database.Crud interface
+// Exist Not implemented common/data_type/database.Crud interface
 //
 // Returns an error
-func (conf *Configuration) Exist(_ *remote.ClientSocket) bool {
+func (c *Configuration) Exist(_ interface{}) bool {
 	return false
 }
 
-// Not implemented common/data_type/database.Crud interface
+// Update Not implemented common/data_type/database.Crud interface
 //
 // Returns an error
-func (conf *Configuration) Update(_ *remote.ClientSocket, _ uint8) error {
+func (c *Configuration) Update(_ interface{}, _ uint8) error {
 	return fmt.Errorf("not implemented")
 }

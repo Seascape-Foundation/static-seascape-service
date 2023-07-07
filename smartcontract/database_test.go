@@ -7,14 +7,14 @@ import (
 	"testing"
 	"time"
 
+	db "github.com/Seascape-Foundation/mysql-seascape-extension"
 	"github.com/Seascape-Foundation/sds-common-lib/blockchain"
 	"github.com/Seascape-Foundation/sds-common-lib/smartcontract_key"
 	"github.com/Seascape-Foundation/sds-service-lib/configuration"
 	parameter "github.com/Seascape-Foundation/sds-service-lib/identity"
 	"github.com/Seascape-Foundation/sds-service-lib/log"
 	"github.com/Seascape-Foundation/sds-service-lib/remote"
-	"github.com/blocklords/sds/db"
-	"github.com/blocklords/sds/storage/abi"
+	"github.com/Seascape-Foundation/static-seascape-service/abi"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
 )
@@ -55,7 +55,7 @@ func (suite *TestSmartcontractDbSuite) SetupTest() {
 	suite.container = container
 	suite.ctx = ctx
 
-	logger, err := log.New("mysql-suite", log.WITHOUT_TIMESTAMP)
+	logger, err := log.New("mysql-suite", false)
 	suite.Require().NoError(err)
 	app_config, err := configuration.NewAppConfig(logger)
 	suite.Require().NoError(err)
@@ -76,13 +76,12 @@ func (suite *TestSmartcontractDbSuite) SetupTest() {
 	db.DatabaseConfigurations.Parameters["SDS_DATABASE_PORT"] = exposed_port
 	db.DatabaseConfigurations.Parameters["SDS_DATABASE_NAME"] = suite.db_name
 
-	go db.Run(app_config, logger)
 	// wait for initiation of the controller
 	time.Sleep(time.Second * 1)
 
-	database_service, err := parameter.Inprocess(parameter.DATABASE)
+	databaseService, err := parameter.Inprocess("db")
 	suite.Require().NoError(err)
-	client, err := remote.InprocRequestSocket(database_service.Url(), logger, app_config)
+	client, err := remote.InprocRequestSocket(databaseService.Url(), logger, app_config)
 	suite.Require().NoError(err)
 
 	suite.db_con = client
