@@ -3,11 +3,12 @@
 Services:
   - Name: "static"
     Instance: "static-01"
+    Type: Independent
     Controllers:
       - Type: Replier
         Name: "main"
-        Ports:
-          - Value: 5000
+        Instances:
+          - Port: 5000
             Instance: "main-01"
 
     # No Proxies
@@ -16,4 +17,4 @@ Services:
     # Static Service depends on the database
     Extensions:
       - Name: "database"
-        Port: "8002"
+        Port: 8002
