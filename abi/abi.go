@@ -16,42 +16,42 @@ type Abi struct {
 	Id    string `json:"id"`
 }
 
-// Returns the abi content as a string.
+// ToString Returns the abi content as a string.
 // The abi bytes are first formatted.
 // If the abi parameters are invalid, then
 // the ToString() returns empty string.
-func (abi *Abi) ToString() string {
-	if err := abi.format_bytes(); err != nil {
+func (a *Abi) ToString() string {
+	if err := a.formatBytes(); err != nil {
 		return ""
 	}
-	return string(abi.Bytes)
+	return string(a.Bytes)
 }
 
-// Creates the abi hash from the abi body
+// GenerateId Creates the abi hash from the abi body
 // The Abi ID is the unique identifier of the abi
 //
-// The Abi ID is the first 8 characters of the
+// Abi ID is the first 8 characters of the
 // sha256 checksum
 // representation of the abi.
 //
 // If the bytes field is invalid, then the id will be empty
-func (abi *Abi) GenerateId() error {
-	abi.Id = ""
+func (a *Abi) GenerateId() error {
+	a.Id = ""
 
 	// re-serialize to remove the empty spaces
-	if err := abi.format_bytes(); err != nil {
+	if err := a.formatBytes(); err != nil {
 		return fmt.Errorf("format_bytes: %w", err)
 	}
-	encoded := sha256.Sum256(abi.Bytes)
-	abi.Id = hex.EncodeToString(encoded[0:8])
+	encoded := sha256.Sum256(a.Bytes)
+	a.Id = hex.EncodeToString(encoded[0:8])
 
 	return nil
 }
 
-func (abi *Abi) format_bytes() error {
+func (a *Abi) formatBytes() error {
 	// re-serialize to remove the empty spaces
 	var json interface{}
-	err := abi.Interface(&json)
+	err := a.Interface(&json)
 	if err != nil {
 		return fmt.Errorf("failed to deserialize: %w", err)
 	}
@@ -59,15 +59,15 @@ func (abi *Abi) format_bytes() error {
 	if err != nil {
 		return fmt.Errorf("failed to re-serialize: %w", err)
 	}
-	abi.Bytes = bytes
+	a.Bytes = bytes
 
 	return nil
 }
 
-// Get the interface from the bytes
+// Interface Get the interface from the bytes
 // It converts the bytes into the JSON value
-func (abi *Abi) Interface(body interface{}) error {
-	err := data_type.Deserialize(abi.Bytes, body)
+func (a *Abi) Interface(body interface{}) error {
+	err := data_type.Deserialize(a.Bytes, body)
 	if err != nil {
 		return fmt.Errorf("data_type.Deserialize: %w", err)
 	}

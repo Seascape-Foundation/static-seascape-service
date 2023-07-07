@@ -7,7 +7,7 @@ import (
 	"github.com/Seascape-Foundation/sds-common-lib/topic"
 )
 
-// Converts the Topic to the Configuration
+// NewFromTopic Converts the Topic to the Configuration
 // Note that you should set the address as well
 func NewFromTopic(t topic.Topic, address string) (*Configuration, error) {
 	c := &Configuration{
@@ -21,10 +21,10 @@ func NewFromTopic(t topic.Topic, address string) (*Configuration, error) {
 	return c, nil
 }
 
-// Creates a new storage.Configuration class based on the given data
+// New Creates a new storage.Configuration class based on the given data
 func New(parameters key_value.KeyValue) (*Configuration, error) {
 	var conf Configuration
-	err := parameters.ToInterface(&conf)
+	err := parameters.Interface(&conf)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert key-value of Configuration to interface %v", err)
 	}

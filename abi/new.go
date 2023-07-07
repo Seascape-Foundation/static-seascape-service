@@ -35,7 +35,7 @@ func New(kv key_value.KeyValue) (*Abi, error) {
 	}
 	abi.Bytes = []byte(unprefixed)
 
-	if err := abi.format_bytes(); err != nil {
+	if err := abi.formatBytes(); err != nil {
 		return nil, fmt.Errorf("format_bytes: %w", err)
 	}
 

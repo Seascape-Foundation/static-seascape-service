@@ -6,10 +6,10 @@ import (
 	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
 )
 
-// Creates a new storage/smartcontract from the JSON
+// New Creates a new storage/smartcontract from the JSON
 func New(parameters key_value.KeyValue) (*Smartcontract, error) {
 	var sm Smartcontract
-	err := parameters.ToInterface(&sm)
+	err := parameters.Interface(&sm)
 	if err != nil {
 		return nil, err
 	}

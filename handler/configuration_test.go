@@ -7,7 +7,7 @@ import (
 	"github.com/Seascape-Foundation/sds-common-lib/topic"
 	"github.com/Seascape-Foundation/sds-service-lib/communication/message"
 	"github.com/Seascape-Foundation/sds-service-lib/log"
-	"github.com/blocklords/sds/storage/configuration"
+	"github.com/Seascape-Foundation/static-seascape-service/configuration"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -24,7 +24,7 @@ type TestConfigurationSuite struct {
 }
 
 func (suite *TestConfigurationSuite) SetupTest() {
-	logger, err := log.New("test", log.WITH_TIMESTAMP)
+	logger, err := log.New("test", true)
 	suite.Require().NoError(err)
 	suite.logger = logger
 
@@ -73,7 +73,7 @@ func (suite *TestConfigurationSuite) TestGet() {
 	suite.Require().True(reply.IsOK())
 
 	var replied_sm GetConfigurationReply
-	err = reply.Parameters.ToInterface(&replied_sm)
+	err = reply.Parameters.Interface(&replied_sm)
 	suite.Require().NoError(err)
 
 	suite.Require().EqualValues(suite.conf, replied_sm)
@@ -147,15 +147,15 @@ func (suite *TestConfigurationSuite) TestSet() {
 	suite.T().Log(reply.Message)
 	suite.Require().True(reply.IsOK())
 
-	var replied_sm GetConfigurationReply
-	err = reply.Parameters.ToInterface(&replied_sm)
+	var repliedSm GetConfigurationReply
+	err = reply.Parameters.Interface(&repliedSm)
 	suite.Require().NoError(err)
-	suite.Require().EqualValues(valid_request, replied_sm)
+	suite.Require().EqualValues(valid_request, repliedSm)
 
 	// the abi list should have the item
-	sm_in_list, err := suite.conf_list.Get(replied_sm.Topic)
+	sm_in_list, err := suite.conf_list.Get(repliedSm)
 	suite.Require().NoError(err)
-	suite.Require().EqualValues(&replied_sm, sm_in_list)
+	suite.Require().EqualValues(&repliedSm, sm_in_list)
 
 	// registering with empty parameter should fail
 	request = message.Request{

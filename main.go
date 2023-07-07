@@ -62,6 +62,8 @@ func main() {
 	}
 	// add to replier the commands
 	handler.RegisterCommands(replier)
+	// prepare the dependencies that controller needs
+	replier.RequireExtension("database")
 
 	service, err := independent.New(appConfig.Services[0])
 	if err != nil {

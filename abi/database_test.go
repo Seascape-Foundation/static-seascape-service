@@ -2,15 +2,16 @@ package abi
 
 import (
 	"context"
+	"github.com/Seascape-Foundation/sds-service-lib/identity"
 	"path/filepath"
 	"runtime"
 	"testing"
 	"time"
 
+	db "github.com/Seascape-Foundation/mysql-seascape-extension"
 	"github.com/Seascape-Foundation/sds-service-lib/configuration"
 	"github.com/Seascape-Foundation/sds-service-lib/log"
 	"github.com/Seascape-Foundation/sds-service-lib/remote"
-	"github.com/blocklords/sds/db"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
 )
@@ -22,68 +23,68 @@ import (
 // returns the current testing context
 type TestAbiDbSuite struct {
 	suite.Suite
-	db_name   string
+	dbName    string
 	container *mysql.MySQLContainer
-	db_con    *remote.ClientSocket
+	dbCon     *remote.ClientSocket
 	ctx       context.Context
 }
 
 func (suite *TestAbiDbSuite) SetupTest() {
 	// prepare the database creation
-	suite.db_name = "test"
+	suite.dbName = "test"
 	_, filename, _, _ := runtime.Caller(0)
-	storage_abi_sql := "20230308171023_storage_abi.sql"
-	storage_abi_path := filepath.Join(filepath.Dir(filename), "..", "..", "_db", "migrations", storage_abi_sql)
+	storageAbiSql := "20230308171023_storage_abi.sql"
+	storageAbiPath := filepath.Join(filepath.Dir(filename), "..", "..", "_db", "migrations", storageAbiSql)
 
 	// run the container
 	ctx := context.TODO()
 	container, err := mysql.RunContainer(ctx,
-		mysql.WithDatabase(suite.db_name),
+		mysql.WithDatabase(suite.dbName),
 		mysql.WithUsername("root"),
 		mysql.WithPassword("tiger"),
-		mysql.WithScripts(storage_abi_path),
+		mysql.WithScripts(storageAbiPath),
 	)
 	suite.Require().NoError(err)
 	suite.container = container
 	suite.ctx = ctx
 
-	logger, err := log.New("mysql-suite", log.WITHOUT_TIMESTAMP)
+	logger, err := log.New("mysql-suite", false)
 	suite.Require().NoError(err)
-	app_config, err := configuration.NewAppConfig(logger)
+	appConfig, err := configuration.NewAppConfig(logger)
 	suite.Require().NoError(err)
 
 	// Creating a database client
 	// after settings the default parameters
-	// we should have the user name and password
-	app_config.SetDefaults(db.DatabaseConfigurations)
+	// we should have the username and password
+	appConfig.SetDefaults(db.DatabaseConfigurations)
 
 	// Overwrite the default parameters to use test container
 	host, err := container.Host(ctx)
 	suite.Require().NoError(err)
 	ports, err := container.Ports(ctx)
 	suite.Require().NoError(err)
-	exposed_port := ports["3306/tcp"][0].HostPort
+	exposedPort := ports["3306/tcp"][0].HostPort
 
 	db.DatabaseConfigurations.Parameters["SDS_DATABASE_HOST"] = host
-	db.DatabaseConfigurations.Parameters["SDS_DATABASE_PORT"] = exposed_port
-	db.DatabaseConfigurations.Parameters["SDS_DATABASE_NAME"] = suite.db_name
+	db.DatabaseConfigurations.Parameters["SDS_DATABASE_PORT"] = exposedPort
+	db.DatabaseConfigurations.Parameters["SDS_DATABASE_NAME"] = suite.dbName
 
-	go db.Run(app_config, logger)
+	//go db.Run(app_config, logger)
 	// wait for initiation of the controller
 	time.Sleep(time.Second * 1)
 
-	database_service, err := service.Inprocess(service.DATABASE)
+	databaseService, err := identity.Inprocess("database")
 	suite.Require().NoError(err)
-	client, err := remote.InprocRequestSocket(database_service.Url(), logger, app_config)
+	client, err := remote.InprocRequestSocket(databaseService.Url(), logger, appConfig)
 	suite.Require().NoError(err)
 
-	suite.db_con = client
+	suite.dbCon = client
 
 	suite.T().Cleanup(func() {
 		if err := container.Terminate(ctx); err != nil {
 			suite.T().Fatalf("failed to terminate container: %s", err)
 		}
-		if err := suite.db_con.Close(); err != nil {
+		if err := suite.dbCon.Close(); err != nil {
 			suite.T().Fatalf("failed to terminate database connection: %s", err)
 		}
 	})
@@ -98,19 +99,19 @@ func (suite *TestAbiDbSuite) TestAbi() {
 	suite.Require().NoError(err)
 
 	var abis []*Abi
-	err = abi.SelectAll(suite.db_con, &abis)
+	err = abi.SelectAll(suite.dbCon, &abis)
 	suite.Require().NoError(err)
 	suite.Require().Len(abis, 0)
 
 	// Insert into the database
-	err = abi.Insert(suite.db_con)
+	err = abi.Insert(suite.dbCon)
 	suite.Require().NoError(err)
 
 	// duplicate key in database
-	err = abi.Insert(suite.db_con)
+	err = abi.Insert(suite.dbCon)
 	suite.Require().Error(err)
 
-	err = abi.SelectAll(suite.db_con, &abis)
+	err = abi.SelectAll(suite.dbCon, &abis)
 	suite.Require().NoError(err)
 	suite.Require().Len(abis, 1)
 	suite.Require().EqualValues(abi.Id, abis[0].Id)
@@ -122,10 +123,10 @@ func (suite *TestAbiDbSuite) TestAbi() {
 	}
 	err = abi.GenerateId()
 	suite.Require().NoError(err)
-	err = abi.Insert(suite.db_con)
+	err = abi.Insert(suite.dbCon)
 	suite.Require().NoError(err)
 
-	err = abi.SelectAll(suite.db_con, &abis)
+	err = abi.SelectAll(suite.dbCon, &abis)
 	suite.Require().NoError(err)
 	suite.Require().Len(abis, 2)
 
@@ -136,10 +137,10 @@ func (suite *TestAbiDbSuite) TestAbi() {
 	}
 	err = abi.GenerateId()
 	suite.Require().NoError(err)
-	err = abi.Insert(suite.db_con)
+	err = abi.Insert(suite.dbCon)
 	suite.Require().NoError(err)
 
-	err = abi.SelectAll(suite.db_con, &abis)
+	err = abi.SelectAll(suite.dbCon, &abis)
 	suite.Require().NoError(err)
 	suite.Require().Len(abis, 3)
 }

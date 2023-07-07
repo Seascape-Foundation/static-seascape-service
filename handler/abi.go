@@ -2,11 +2,10 @@ package handler
 
 import (
 	"github.com/Seascape-Foundation/sds-common-lib/data_type/database"
-	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
 	"github.com/Seascape-Foundation/sds-service-lib/communication/command"
 	"github.com/Seascape-Foundation/sds-service-lib/log"
 	"github.com/Seascape-Foundation/sds-service-lib/remote"
-	"github.com/blocklords/sds/storage/abi"
+	"github.com/Seascape-Foundation/static-seascape-service/abi"
 
 	"github.com/Seascape-Foundation/sds-service-lib/communication/message"
 )
@@ -21,88 +20,71 @@ type SetAbiRequest struct {
 }
 type SetAbiReply = abi.Abi
 
-// Returns an abi by abi id
-func AbiGet(request message.Request, _ log.Logger, parameters ...interface{}) message.Reply {
-	if len(parameters) < 2 {
-		return message.Fail("missing abi list")
+// AbiGet returns the abi
+// Depends on the database extension
+var AbiGet = func(request message.Request, _ log.Logger, extensions remote.Clients) message.Reply {
+	if !remote.ClientExist(extensions, "database") {
+		return message.Fail("missing extension")
 	}
 
-	var req_parameters GetAbiRequest
-	err := request.Parameters.ToInterface(&req_parameters)
+	var reqParameters GetAbiRequest
+	err := request.Parameters.Interface(&reqParameters)
 	if err != nil {
 		return message.Fail("request.Parameters -> Command Parameter: " + err.Error())
 	}
-	if len(req_parameters.Id) == 0 {
+	if len(reqParameters.Id) == 0 {
 		return message.Fail("missing abi id")
 	}
 
-	abi_list, ok := parameters[1].(*key_value.List)
-	if !ok {
-		return message.Fail("missing abi list")
-	}
-	abi_raw, err := abi_list.Get(req_parameters.Id)
-	if err != nil {
-		return message.Fail("abi_list.Get: " + err.Error())
+	dbCon := remote.GetClient(extensions, "database")
+	var selectedAbi = abi.Abi{}
+	var crud database.Crud = &selectedAbi
+	saveErr := crud.Select(dbCon, &selectedAbi)
+	if saveErr != nil {
+		return message.Fail("database error:" + err.Error())
 	}
 
-	reply_message, err := command.Reply(abi_raw)
+	replyMessage, err := command.Reply(selectedAbi)
 	if err != nil {
 		return message.Fail("failed to reply")
 	}
-
-	return reply_message
+	return replyMessage
 }
 
-func AbiRegister(request message.Request, _ log.Logger, parameters ...interface{}) message.Reply {
-	if len(parameters) < 2 {
-		return message.Fail("missing abi list")
+func AbiRegister(request message.Request, _ log.Logger, extensions remote.Clients) message.Reply {
+	if !remote.ClientExist(extensions, "database") {
+		return message.Fail("missing extension")
 	}
 
-	var request_parameters SetAbiRequest
-	err := request.Parameters.ToInterface(&request_parameters)
+	var requestParameters SetAbiRequest
+	err := request.Parameters.Interface(&requestParameters)
 	if err != nil {
 		return message.Fail("failed to parse data")
 	}
 
-	if request_parameters.Body == nil {
+	if requestParameters.Body == nil {
 		return message.Fail("missing body")
 	}
 
-	new_abi, err := abi.NewFromInterface(request_parameters.Body)
+	newAbi, err := abi.NewFromInterface(requestParameters.Body)
 	if err != nil {
 		return message.Fail("abi.NewFromInterface: " + err.Error())
 	}
-	if len(new_abi.Bytes) == 0 {
+	if len(newAbi.Bytes) == 0 {
 		return message.Fail("body is empty")
 	}
 
-	reply_message, err := command.Reply(new_abi)
+	replyMessage, err := command.Reply(newAbi)
 	if err != nil {
 		return message.Fail("failed to reply")
 	}
 
-	abi_list, ok := parameters[1].(*key_value.List)
-	if !ok {
-		return message.Fail("missing abi list")
-	}
-	_, err = abi_list.Get(new_abi.Id)
-	if err == nil {
-		return message.Fail("abi registered already for")
+	dbCon := remote.GetClient(extensions, "database")
+	var crud database.Crud = newAbi
+	saveErr := crud.Insert(dbCon)
+	if saveErr != nil {
+		return message.Fail("database error:" + err.Error())
 	}
 
-	err = abi_list.Add(new_abi.Id, new_abi)
-	if err != nil {
-		return message.Fail("failed to add abi to abi list: " + err.Error())
-	}
-
-	db_con, ok := parameters[0].(*remote.ClientSocket)
-	if ok {
-		var crud database.Crud = new_abi
-		save_err := crud.Insert(db_con)
-		if save_err != nil {
-			return message.Fail("database error:" + err.Error())
-		}
-	}
-
-	return reply_message
+	return replyMessage
 }

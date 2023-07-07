@@ -7,8 +7,8 @@ import (
 	"github.com/Seascape-Foundation/sds-common-lib/smartcontract_key"
 	"github.com/Seascape-Foundation/sds-common-lib/topic"
 	"github.com/Seascape-Foundation/sds-service-lib/log"
-	"github.com/blocklords/sds/storage/configuration"
-	"github.com/blocklords/sds/storage/smartcontract"
+	"github.com/Seascape-Foundation/static-seascape-service/configuration"
+	"github.com/Seascape-Foundation/static-seascape-service/smartcontract"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -19,11 +19,11 @@ import (
 // returns the current testing context
 type TestFilterSuite struct {
 	suite.Suite
-	logger    log.Logger
-	conf      configuration.Configuration
-	sm        smartcontract.Smartcontract
-	conf_list *key_value.List
-	sm_list   *key_value.List
+	logger   log.Logger
+	conf     configuration.Configuration
+	sm       smartcontract.Smartcontract
+	confList *key_value.List
+	smList   *key_value.List
 }
 
 /*
@@ -31,24 +31,22 @@ Two organization
 
 	first one has 1 conf
 	second one has many
-
-	org has 2 orgs
 */
 func (suite *TestFilterSuite) SetupTest() {
-	logger, err := log.New("test", log.WITH_TIMESTAMP)
+	logger, err := log.New("test", false)
 	suite.Require().NoError(err)
 	suite.logger = logger
 
-	sm_0 := smartcontract.Smartcontract{
+	sm0 := smartcontract.Smartcontract{
 		SmartcontractKey: smartcontract_key.Key{
 			NetworkId: "test_1",
 			Address:   "0xaddr_0",
 		},
 		AbiId: "abi",
 	}
-	suite.sm = sm_0
+	suite.sm = sm0
 
-	sm_1 := smartcontract.Smartcontract{
+	sm1 := smartcontract.Smartcontract{
 		SmartcontractKey: smartcontract_key.Key{
 			NetworkId: "test_1",
 			Address:   "0xaddr_1",
@@ -56,7 +54,7 @@ func (suite *TestFilterSuite) SetupTest() {
 		AbiId: "abi",
 	}
 
-	sm_2 := smartcontract.Smartcontract{
+	sm2 := smartcontract.Smartcontract{
 		SmartcontractKey: smartcontract_key.Key{
 			NetworkId: "test_2",
 			Address:   "0xaddr_2",
@@ -64,7 +62,7 @@ func (suite *TestFilterSuite) SetupTest() {
 		AbiId: "abi",
 	}
 
-	conf_0 := configuration.Configuration{
+	conf0 := configuration.Configuration{
 		Topic: topic.Topic{
 			Organization:  "test_org",
 			Project:       "test_proj",
@@ -74,9 +72,9 @@ func (suite *TestFilterSuite) SetupTest() {
 		},
 		Address: "0xaddr_0",
 	}
-	suite.conf = conf_0
+	suite.conf = conf0
 
-	conf_1 := configuration.Configuration{
+	conf1 := configuration.Configuration{
 		Topic: topic.Topic{
 			Organization:  "test_org_1",
 			Project:       "test_proj_1",
@@ -87,7 +85,7 @@ func (suite *TestFilterSuite) SetupTest() {
 		Address: "0xaddr_1",
 	}
 
-	conf_2 := configuration.Configuration{
+	conf2 := configuration.Configuration{
 		Topic: topic.Topic{
 			Organization:  "test_org",
 			Project:       "test_proj_2",
@@ -99,130 +97,130 @@ func (suite *TestFilterSuite) SetupTest() {
 	}
 
 	list := key_value.NewList()
-	err = list.Add(conf_0.Topic, &conf_0)
+	err = list.Add(conf0.Topic, &conf0)
 	suite.Require().NoError(err)
 
-	err = list.Add(conf_1.Topic, &conf_1)
+	err = list.Add(conf1.Topic, &conf1)
 	suite.Require().NoError(err)
-	suite.conf_list = list
+	suite.confList = list
 
-	err = list.Add(conf_2.Topic, &conf_2)
+	err = list.Add(conf2.Topic, &conf2)
 	suite.Require().NoError(err)
-	suite.conf_list = list
+	suite.confList = list
 
-	sm_list := key_value.NewList()
-	err = sm_list.Add(sm_0.SmartcontractKey, &sm_0)
-	suite.Require().NoError(err)
-
-	err = sm_list.Add(sm_1.SmartcontractKey, &sm_1)
+	smList := key_value.NewList()
+	err = smList.Add(sm0.SmartcontractKey, &sm0)
 	suite.Require().NoError(err)
 
-	err = sm_list.Add(sm_2.SmartcontractKey, &sm_2)
+	err = smList.Add(sm1.SmartcontractKey, &sm1)
 	suite.Require().NoError(err)
 
-	suite.sm_list = sm_list
+	err = smList.Add(sm2.SmartcontractKey, &sm2)
+	suite.Require().NoError(err)
+
+	suite.smList = smList
 }
 
 func (suite *TestFilterSuite) TestOrganizationFilter() {
 	// empty paths should return all configurations
-	paths := []string{}
-	new_list := filter_organization(suite.conf_list, paths)
-	suite.Require().Equal(new_list.Len(), 3)
-	suite.Require().False(new_list.IsEmpty())
+	var paths []string
+	newList := filterOrganization(suite.confList, paths)
+	suite.Require().Equal(newList.Len(), 3)
+	suite.Require().False(newList.IsEmpty())
 
-	// fetching the non existing paths should return empty list
+	// fetching the non-existing paths should return empty list
 	paths = []string{"no_org"}
-	new_list = filter_organization(suite.conf_list, paths)
-	suite.Require().Equal(new_list.Len(), 0)
-	suite.Require().True(new_list.IsEmpty())
+	newList = filterOrganization(suite.confList, paths)
+	suite.Require().Equal(newList.Len(), 0)
+	suite.Require().True(newList.IsEmpty())
 
 	// fetching the org that has one element
 	paths = []string{"test_org_1"}
-	new_list = filter_organization(suite.conf_list, paths)
-	suite.Require().Equal(new_list.Len(), 1)
-	suite.Require().False(new_list.IsEmpty())
+	newList = filterOrganization(suite.confList, paths)
+	suite.Require().Equal(newList.Len(), 1)
+	suite.Require().False(newList.IsEmpty())
 
 	// fetching the org that has two element
 	paths = []string{"test_org"}
-	new_list = filter_organization(suite.conf_list, paths)
-	suite.Require().Equal(new_list.Len(), 2)
-	suite.Require().False(new_list.IsEmpty())
+	newList = filterOrganization(suite.confList, paths)
+	suite.Require().Equal(newList.Len(), 2)
+	suite.Require().False(newList.IsEmpty())
 
 	paths = []string{"test_org", "test_org_1"}
-	new_list = filter_organization(suite.conf_list, paths)
-	suite.Require().Equal(new_list.Len(), 3)
-	suite.Require().False(new_list.IsEmpty())
+	newList = filterOrganization(suite.confList, paths)
+	suite.Require().Equal(newList.Len(), 3)
+	suite.Require().False(newList.IsEmpty())
 
 	paths = []string{"test_org", "test_org_1", "non_exist"}
-	new_list = filter_organization(suite.conf_list, paths)
-	suite.Require().Equal(new_list.Len(), 3)
-	suite.Require().False(new_list.IsEmpty())
+	newList = filterOrganization(suite.confList, paths)
+	suite.Require().Equal(newList.Len(), 3)
+	suite.Require().False(newList.IsEmpty())
 }
 
 func (suite *TestFilterSuite) TestNetworkIdFilter() {
 	// empty paths should return all configurations
-	paths := []string{}
-	new_list := filter_network_id(suite.conf_list, paths)
-	suite.Require().Equal(new_list.Len(), 3)
-	suite.Require().False(new_list.IsEmpty())
+	var paths []string
+	newList := filterNetworkId(suite.confList, paths)
+	suite.Require().Equal(newList.Len(), 3)
+	suite.Require().False(newList.IsEmpty())
 
-	// fetching the non existing paths should return empty list
+	// fetching the non-existing paths should return empty list
 	paths = []string{"ideal_blockchain"}
-	new_list = filter_network_id(suite.conf_list, paths)
-	suite.Require().Equal(new_list.Len(), 0)
-	suite.Require().True(new_list.IsEmpty())
+	newList = filterNetworkId(suite.confList, paths)
+	suite.Require().Equal(newList.Len(), 0)
+	suite.Require().True(newList.IsEmpty())
 
 	// fetching the org that has one element
 	paths = []string{"test_2"}
-	new_list = filter_network_id(suite.conf_list, paths)
-	suite.Require().Equal(new_list.Len(), 1)
-	suite.Require().False(new_list.IsEmpty())
+	newList = filterNetworkId(suite.confList, paths)
+	suite.Require().Equal(newList.Len(), 1)
+	suite.Require().False(newList.IsEmpty())
 
 	// fetching the org that has two element
 	paths = []string{"test_1"}
-	new_list = filter_network_id(suite.conf_list, paths)
-	suite.Require().Equal(new_list.Len(), 2)
-	suite.Require().False(new_list.IsEmpty())
+	newList = filterNetworkId(suite.confList, paths)
+	suite.Require().Equal(newList.Len(), 2)
+	suite.Require().False(newList.IsEmpty())
 
 	paths = []string{"test_1", "test_2"}
-	new_list = filter_network_id(suite.conf_list, paths)
-	suite.Require().Equal(new_list.Len(), 3)
-	suite.Require().False(new_list.IsEmpty())
+	newList = filterNetworkId(suite.confList, paths)
+	suite.Require().Equal(newList.Len(), 3)
+	suite.Require().False(newList.IsEmpty())
 
 	paths = []string{"test_org"}
-	new_list = filter_organization(suite.conf_list, paths)
-	suite.Require().Equal(new_list.Len(), 2)
-	suite.Require().False(new_list.IsEmpty())
+	newList = filterOrganization(suite.confList, paths)
+	suite.Require().Equal(newList.Len(), 2)
+	suite.Require().False(newList.IsEmpty())
 
 	// fetching from new list should be successful
 	paths = []string{"test_1"}
-	new_list = filter_network_id(new_list, paths)
-	suite.Require().Equal(new_list.Len(), 1)
-	suite.Require().False(new_list.IsEmpty())
+	newList = filterNetworkId(newList, paths)
+	suite.Require().Equal(newList.Len(), 1)
+	suite.Require().False(newList.IsEmpty())
 }
 
 func (suite *TestFilterSuite) TestConfigurationFiltering() {
-	topic_filter := topic.TopicFilter{
+	topicFilter := topic.Filter{
 		Organizations: []string{"test_org"},
 		NetworkIds:    []string{"test_1"},
 	}
-	new_list := filter_configuration(suite.conf_list, &topic_filter)
-	suite.Require().Len(new_list, 1)
+	newList := filterConfiguration(suite.confList, &topicFilter)
+	suite.Require().Len(newList, 1)
 }
 
 func (suite *TestFilterSuite) TestSmartcontractFiltering() {
-	topic_filter := topic.TopicFilter{
+	topicFilter := topic.Filter{
 		Organizations: []string{"test_org"},
 		NetworkIds:    []string{"test_1"},
 	}
-	new_list := filter_configuration(suite.conf_list, &topic_filter)
+	newList := filterConfiguration(suite.confList, &topicFilter)
 
-	suite.T().Log("configs", new_list[0])
+	suite.T().Log("configs", newList[0])
 
-	filtered_sm, filtered_topics, err := filter_smartcontract(new_list, suite.sm_list)
+	filteredSm, filteredTopics, err := filterSmartcontract(newList, suite.smList)
 	suite.Require().NoError(err)
-	suite.Require().NotEmpty(filtered_sm)
-	suite.Require().EqualValues(suite.conf.Topic.ToString(topic.SMARTCONTRACT_LEVEL), filtered_topics[0])
+	suite.Require().NotEmpty(filteredSm)
+	suite.Require().EqualValues(suite.conf.Topic.String(topic.SmartcontractLevel), filteredTopics[0])
 }
 
 // In order for 'go test' to run this suite, we need to create

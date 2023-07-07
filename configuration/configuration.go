@@ -7,7 +7,7 @@ import (
 	"github.com/Seascape-Foundation/sds-common-lib/topic"
 )
 
-// The Storage Configuration is the relationship
+// Configuration The Storage Configuration is the relationship
 // between the topic and the smartcontract.
 //
 // The database part depends on the Storage Smartcontract
@@ -20,7 +20,7 @@ func (c *Configuration) Validate() error {
 	if err := c.Topic.Validate(); err != nil {
 		return fmt.Errorf("Topic.Validate: %w", err)
 	}
-	if c.Topic.Level() != topic.SMARTCONTRACT_LEVEL {
+	if c.Topic.Level() != topic.SmartcontractLevel {
 		return fmt.Errorf("Topic.Level is not smartcontract level")
 	}
 	if len(c.Address) == 0 {

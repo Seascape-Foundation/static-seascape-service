@@ -3,10 +3,9 @@ package handler
 import (
 	"github.com/Seascape-Foundation/sds-service-lib/log"
 	"github.com/Seascape-Foundation/sds-service-lib/remote"
-	"github.com/blocklords/sds/storage/smartcontract"
+	"github.com/Seascape-Foundation/static-seascape-service/smartcontract"
 
 	"github.com/Seascape-Foundation/sds-common-lib/data_type/database"
-	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
 	"github.com/Seascape-Foundation/sds-common-lib/smartcontract_key"
 
 	"github.com/Seascape-Foundation/sds-service-lib/communication/command"
@@ -18,16 +17,12 @@ type SetSmartcontractReply = smartcontract.Smartcontract
 type GetSmartcontractRequest = smartcontract_key.Key
 type GetSmartcontractReply = smartcontract.Smartcontract
 
-// Register a new smartcontract. It means we are adding smartcontract parameters into
+// SmartcontractRegister Register a new smartcontract. It means we are adding smartcontract parameters into
 // smartcontract database table.
 // Requires abi_id parameter. First call abi_register method first.
-func SmartcontractRegister(request message.Request, _ log.Logger, parameters ...interface{}) message.Reply {
-	if len(parameters) < 3 {
-		return message.Fail("missing smartcontract list")
-	}
-
+func SmartcontractRegister(request message.Request, _ log.Logger, clients remote.Clients) message.Reply {
 	var sm SetSmartcontractRequest
-	err := request.Parameters.ToInterface(&sm)
+	err := request.Parameters.Interface(&sm)
 	if err != nil {
 		return message.Fail("failed to parse data")
 	}
@@ -36,44 +31,25 @@ func SmartcontractRegister(request message.Request, _ log.Logger, parameters ...
 	}
 
 	var reply = sm
-	reply_message, err := command.Reply(&reply)
+	replyMessage, err := command.Reply(&reply)
 	if err != nil {
 		return message.Fail("failed to reply")
 	}
 
-	sm_list, ok := parameters[2].(*key_value.List)
-	if !ok {
-		return message.Fail("no smartcontract list")
-	}
-	_, err = sm_list.Get(sm.SmartcontractKey)
-	if err == nil {
-		return message.Fail("smartcontract already registered")
+	dbCon := remote.GetClient(clients, "database")
+
+	var crud database.Crud = &sm
+	if err = crud.Insert(dbCon); err != nil {
+		return message.Fail("Smartcontract saving in the database failed: " + err.Error())
 	}
 
-	err = sm_list.Add(sm.SmartcontractKey, &sm)
-	if err != nil {
-		return message.Fail("failed to add abi to abi list: " + err.Error())
-	}
-
-	db_con, ok := parameters[0].(*remote.ClientSocket)
-	if ok {
-		var crud database.Crud = &sm
-		if err = crud.Insert(db_con); err != nil {
-			return message.Fail("Smartcontract saving in the database failed: " + err.Error())
-		}
-	}
-
-	return reply_message
+	return replyMessage
 }
 
-// Returns configuration and smartcontract information related to the configuration
-func SmartcontractGet(request message.Request, _ log.Logger, parameters ...interface{}) message.Reply {
-	if len(parameters) < 3 {
-		return message.Fail("missing smartcontract list")
-	}
-
+// SmartcontractGet Returns configuration and smartcontract information related to the configuration
+var SmartcontractGet = func(request message.Request, _ log.Logger, clients remote.Clients) message.Reply {
 	var key GetSmartcontractRequest
-	err := request.Parameters.ToInterface(&key)
+	err := request.Parameters.Interface(&key)
 	if err != nil {
 		return message.Fail("failed to parse data")
 	}
@@ -81,20 +57,19 @@ func SmartcontractGet(request message.Request, _ log.Logger, parameters ...inter
 		return message.Fail("key.Validate: " + err.Error())
 	}
 
-	sm_list, ok := parameters[2].(*key_value.List)
-	if !ok {
-		return message.Fail("no smartcontract list")
-	}
-	sm_raw, err := sm_list.Get(key)
+	dbCon := remote.GetClient(clients, "database")
+
+	var selected = smartcontract.Smartcontract{}
+	var crud database.Crud = &selected
+	err = crud.Select(dbCon, &selected)
 	if err != nil {
-		return message.Fail("failed to get smartcontract: " + err.Error())
+		return message.Fail("failed to get configuration from the database: " + err.Error())
 	}
 
-	var reply = *sm_raw.(*smartcontract.Smartcontract)
-	reply_message, err := command.Reply(&reply)
+	replyMessage, err := command.Reply(&selected)
 	if err != nil {
 		return message.Fail("failed to reply")
 	}
 
-	return reply_message
+	return replyMessage
 }

@@ -2,11 +2,10 @@ package handler
 
 import (
 	"github.com/Seascape-Foundation/sds-common-lib/data_type/database"
-	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
 	"github.com/Seascape-Foundation/sds-common-lib/topic"
 	"github.com/Seascape-Foundation/sds-service-lib/log"
 	"github.com/Seascape-Foundation/sds-service-lib/remote"
-	"github.com/blocklords/sds/storage/configuration"
+	"github.com/Seascape-Foundation/static-seascape-service/configuration"
 
 	"github.com/Seascape-Foundation/sds-service-lib/communication/command"
 	"github.com/Seascape-Foundation/sds-service-lib/communication/message"
@@ -18,19 +17,11 @@ type GetConfigurationReply = configuration.Configuration
 type SetConfigurationRequest = configuration.Configuration
 type SetConfigurationReply = configuration.Configuration
 
-// Register a new smartcontract in the configuration.
+// ConfigurationRegister Register a new smartcontract in the configuration.
 // It requires smartcontract address. First call smartcontract_register command.
-func ConfigurationRegister(request message.Request, logger log.Logger, parameters ...interface{}) message.Reply {
-	if len(parameters) < 4 {
-		return message.Fail("missing configuration list")
-	}
-	conf_list, ok := parameters[3].(*key_value.List)
-	if !ok {
-		return message.Fail("configuration list expected")
-	}
-
+var ConfigurationRegister = func(request message.Request, _ log.Logger, clients remote.Clients) message.Reply {
 	var conf SetConfigurationRequest
-	err := request.Parameters.ToInterface(&conf)
+	err := request.Parameters.Interface(&conf)
 	if err != nil {
 		return message.Fail("failed to parse data")
 	}
@@ -38,65 +29,48 @@ func ConfigurationRegister(request message.Request, logger log.Logger, parameter
 		return message.Fail("validation: " + err.Error())
 	}
 
-	_, err = conf_list.Get(conf.Topic)
-	if err == nil {
-		return message.Fail("configuration already added")
-	}
-
-	err = conf_list.Add(conf.Topic, &conf)
-	if err != nil {
-		return message.Fail("failed to add abi to abi list: " + err.Error())
-	}
-
-	db_con, ok := parameters[0].(*remote.ClientSocket)
-	if ok {
-		var crud database.Crud = &conf
-		if err = crud.Insert(db_con); err != nil {
-			return message.Fail("Configuration saving in the database failed: " + err.Error())
-		}
+	dbCon := remote.GetClient(clients, "database")
+	var crud database.Crud = &conf
+	if err = crud.Insert(dbCon); err != nil {
+		return message.Fail("Configuration saving in the database failed: " + err.Error())
 	}
 
 	var reply = conf
-	reply_message, err := command.Reply(&reply)
+	replyMessage, err := command.Reply(&reply)
 	if err != nil {
 		return message.Fail("failed to reply")
 	}
 
-	return reply_message
+	return replyMessage
 }
 
-// Returns configuration and smartcontract information related to the configuration
-func ConfigurationGet(request message.Request, _ log.Logger, parameters ...interface{}) message.Reply {
-	if len(parameters) < 4 {
-		return message.Fail("missing configuration list")
-	}
-	conf_list, ok := parameters[3].(*key_value.List)
-	if !ok {
-		return message.Fail("configuration list expected")
-	}
-
-	var conf_topic GetConfigurationRequest
-	err := request.Parameters.ToInterface(&conf_topic)
+// ConfigurationGet Returns configuration and smartcontract information related to the configuration
+func ConfigurationGet(request message.Request, _ log.Logger, clients remote.Clients) message.Reply {
+	var confTopic GetConfigurationRequest
+	err := request.Parameters.Interface(&confTopic)
 	if err != nil {
 		return message.Fail("failed to parse data")
 	}
-	if err := conf_topic.Validate(); err != nil {
+	if err := confTopic.Validate(); err != nil {
 		return message.Fail("invalid topic: " + err.Error())
 	}
-	if conf_topic.Level() != topic.SMARTCONTRACT_LEVEL {
+	if confTopic.Level() != topic.SmartcontractLevel {
 		return message.Fail("topic level is not at SMARTCONTRACT LEVEL")
 	}
 
-	conf_raw, err := conf_list.Get(conf_topic)
+	dbCon := remote.GetClient(clients, "database")
+
+	var selectedConf = configuration.Configuration{}
+	var crud database.Crud = &selectedConf
+	err = crud.Select(dbCon, &selectedConf)
 	if err != nil {
-		return message.Fail("failed to get configuration or not found: " + err.Error())
+		return message.Fail("failed to get configuration from the database: " + err.Error())
 	}
 
-	var reply = *conf_raw.(*configuration.Configuration)
-	reply_message, err := command.Reply(&reply)
+	replyMessage, err := command.Reply(&selectedConf)
 	if err != nil {
 		return message.Fail("failed to reply")
 	}
 
-	return reply_message
+	return replyMessage
 }
