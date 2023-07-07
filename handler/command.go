@@ -4,36 +4,36 @@ package handler
 
 import (
 	"github.com/Seascape-Foundation/sds-service-lib/communication/command"
+	"github.com/Seascape-Foundation/sds-service-lib/controller"
 )
 
 const (
 	// Direct
-	GET_ABI command.CommandName = "abi_get"
+	GET_ABI command.Name = "abi_get"
 	// Through the router
-	SET_ABI command.CommandName = "abi_set"
+	SET_ABI command.Name = "abi_set"
 	// Through the router
-	GET_CONFIGURATION command.CommandName = "configuration_get"
+	GET_CONFIGURATION command.Name = "configuration_get"
 	// Through the router
-	SET_CONFIGURATION command.CommandName = "configuration_set"
+	SET_CONFIGURATION command.Name = "configuration_set"
 	// Direct
-	FILTER_SMARTCONTRACTS command.CommandName = "smartcontract_filter"
+	FILTER_SMARTCONTRACTS command.Name = "smartcontract_filter"
 	// Through the router
-	FILTER_SMARTCONTRACT_KEYS command.CommandName = "smartcontract_key_filter"
+	FILTER_SMARTCONTRACT_KEYS command.Name = "smartcontract_key_filter"
 	// Through the router
-	SET_SMARTCONTRACT command.CommandName = "smartcontract_set"
+	SET_SMARTCONTRACT command.Name = "smartcontract_set"
 	// Direct
-	GET_SMARTCONTRACT command.CommandName = "smartcontract_get"
+	GET_SMARTCONTRACT command.Name = "smartcontract_get"
 )
 
-// Return list of all commands and their handlers
-func CommandHandlers() command.Handlers {
-	return command.EmptyHandlers().
-		Add(GET_ABI, AbiGet).
-		Add(SET_ABI, AbiRegister).
-		Add(GET_SMARTCONTRACT, SmartcontractGet).
-		Add(SET_SMARTCONTRACT, SmartcontractRegister).
-		Add(FILTER_SMARTCONTRACTS, SmartcontractFilter).
-		Add(FILTER_SMARTCONTRACT_KEYS, SmartcontractKeyFilter).
-		Add(GET_CONFIGURATION, ConfigurationGet).
-		Add(SET_CONFIGURATION, ConfigurationRegister)
+// RegisterCommands registers the commands and their handlers in the controller
+func RegisterCommands(c *controller.Controller) {
+	c.RegisterCommand(GET_ABI, AbiGet)
+	c.RegisterCommand(SET_ABI, AbiRegister)
+	c.RegisterCommand(GET_SMARTCONTRACT, SmartcontractGet)
+	c.RegisterCommand(SET_SMARTCONTRACT, SmartcontractRegister)
+	c.RegisterCommand(FILTER_SMARTCONTRACTS, SmartcontractFilter)
+	c.RegisterCommand(FILTER_SMARTCONTRACT_KEYS, SmartcontractKeyFilter)
+	c.RegisterCommand(GET_CONFIGURATION, ConfigurationGet)
+	c.RegisterCommand(SET_CONFIGURATION, ConfigurationRegister)
 }
