@@ -3,9 +3,9 @@ package smartcontract
 import (
 	"testing"
 
-	"github.com/blocklords/sds/common/blockchain"
-	"github.com/blocklords/sds/common/data_type/key_value"
-	"github.com/blocklords/sds/common/smartcontract_key"
+	"github.com/Seascape-Foundation/sds-common-lib/blockchain"
+	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
+	"github.com/Seascape-Foundation/sds-common-lib/smartcontract_key"
 	"github.com/stretchr/testify/suite"
 )
 

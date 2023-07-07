@@ -3,11 +3,11 @@ package smartcontract
 import (
 	"fmt"
 
-	"github.com/blocklords/sds/common/blockchain"
-	"github.com/blocklords/sds/common/data_type/key_value"
-	"github.com/blocklords/sds/common/smartcontract_key"
+	"github.com/Seascape-Foundation/sds-common-lib/blockchain"
+	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
+	"github.com/Seascape-Foundation/sds-common-lib/smartcontract_key"
+	"github.com/Seascape-Foundation/sds-service-lib/remote"
 	"github.com/blocklords/sds/database/handler"
-	"github.com/blocklords/sds/service/remote"
 )
 
 // Inserts the smartcontract into the database

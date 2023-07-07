@@ -8,7 +8,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/blocklords/sds/common/data_type"
+	"github.com/Seascape-Foundation/sds-common-lib/data_type"
 )
 
 type Abi struct {

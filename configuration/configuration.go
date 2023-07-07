@@ -4,7 +4,7 @@ package configuration
 import (
 	"fmt"
 
-	"github.com/blocklords/sds/common/topic"
+	"github.com/Seascape-Foundation/sds-common-lib/topic"
 )
 
 // The Storage Configuration is the relationship

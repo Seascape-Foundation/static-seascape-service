@@ -3,16 +3,16 @@ package handler
 import (
 	"fmt"
 
-	"github.com/blocklords/sds/service/log"
+	"github.com/Seascape-Foundation/sds-service-lib/log"
 	"github.com/blocklords/sds/storage/configuration"
 	"github.com/blocklords/sds/storage/smartcontract"
 
-	"github.com/blocklords/sds/common/data_type/key_value"
-	"github.com/blocklords/sds/common/smartcontract_key"
-	"github.com/blocklords/sds/common/topic"
+	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
+	"github.com/Seascape-Foundation/sds-common-lib/smartcontract_key"
+	"github.com/Seascape-Foundation/sds-common-lib/topic"
 
-	"github.com/blocklords/sds/service/communication/command"
-	"github.com/blocklords/sds/service/communication/message"
+	"github.com/Seascape-Foundation/sds-service-lib/communication/command"
+	"github.com/Seascape-Foundation/sds-service-lib/communication/message"
 )
 
 type FilterSmartcontractsRequest = topic.TopicFilter

@@ -3,10 +3,10 @@ package configuration
 import (
 	"fmt"
 
-	"github.com/blocklords/sds/common/data_type/key_value"
-	"github.com/blocklords/sds/common/topic"
+	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
+	"github.com/Seascape-Foundation/sds-common-lib/topic"
+	"github.com/Seascape-Foundation/sds-service-lib/remote"
 	"github.com/blocklords/sds/database/handler"
-	"github.com/blocklords/sds/service/remote"
 )
 
 // Inserts the configuration into the database

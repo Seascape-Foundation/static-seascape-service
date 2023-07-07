@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Seascape-Foundation/sds-service-lib/configuration"
+	"github.com/Seascape-Foundation/sds-service-lib/log"
+	"github.com/Seascape-Foundation/sds-service-lib/remote"
 	"github.com/blocklords/sds/db"
-	"github.com/blocklords/sds/service/configuration"
-	"github.com/blocklords/sds/service/log"
-	"github.com/blocklords/sds/service/remote"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
 )

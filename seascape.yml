@@ -1,0 +1,19 @@
+# Configuration of this service
+
+Services:
+  - Name: "static"
+    Instance: "static-01"
+    Controllers:
+      - Type: Replier
+        Name: "main"
+        Ports:
+          - Value: 5000
+            Instance: "main-01"
+
+    # No Proxies
+    # No Pipelines
+
+    # Static Service depends on the database
+    Extensions:
+      - Name: "database"
+        Port: "8002"

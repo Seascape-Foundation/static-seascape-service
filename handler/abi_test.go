@@ -3,9 +3,9 @@ package handler
 import (
 	"testing"
 
-	"github.com/blocklords/sds/common/data_type/key_value"
-	"github.com/blocklords/sds/service/communication/message"
-	"github.com/blocklords/sds/service/log"
+	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
+	"github.com/Seascape-Foundation/sds-service-lib/communication/message"
+	"github.com/Seascape-Foundation/sds-service-lib/log"
 	"github.com/blocklords/sds/storage/abi"
 	"github.com/stretchr/testify/suite"
 )

@@ -1,14 +1,14 @@
 package handler
 
 import (
-	"github.com/blocklords/sds/common/data_type/database"
-	"github.com/blocklords/sds/common/data_type/key_value"
-	"github.com/blocklords/sds/service/communication/command"
-	"github.com/blocklords/sds/service/log"
-	"github.com/blocklords/sds/service/remote"
+	"github.com/Seascape-Foundation/sds-common-lib/data_type/database"
+	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
+	"github.com/Seascape-Foundation/sds-service-lib/communication/command"
+	"github.com/Seascape-Foundation/sds-service-lib/log"
+	"github.com/Seascape-Foundation/sds-service-lib/remote"
 	"github.com/blocklords/sds/storage/abi"
 
-	"github.com/blocklords/sds/service/communication/message"
+	"github.com/Seascape-Foundation/sds-service-lib/communication/message"
 )
 
 type GetAbiRequest struct {

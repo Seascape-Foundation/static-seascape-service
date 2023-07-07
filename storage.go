@@ -8,30 +8,30 @@
 package main
 
 import (
-	"github.com/blocklords/sds/common/data_type/database"
-	"github.com/blocklords/sds/common/data_type/key_value"
-	"github.com/blocklords/sds/service/configuration"
-	"github.com/blocklords/sds/service/controller"
-	parameter "github.com/blocklords/sds/service/identity"
-	"github.com/blocklords/sds/service/log"
-	"github.com/blocklords/sds/service/remote"
+	"github.com/Seascape-Foundation/sds-common-lib/data_type/database"
+	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
+	"github.com/Seascape-Foundation/sds-service-lib/configuration"
+	"github.com/Seascape-Foundation/sds-service-lib/controller"
+	parameter "github.com/Seascape-Foundation/sds-service-lib/identity"
+	"github.com/Seascape-Foundation/sds-service-lib/log"
+	"github.com/Seascape-Foundation/sds-service-lib/remote"
 	"github.com/blocklords/sds/storage/abi"
 	storage_conf "github.com/blocklords/sds/storage/configuration"
 	"github.com/blocklords/sds/storage/handler"
 	"github.com/blocklords/sds/storage/smartcontract"
 )
 
-// Return the list of command handlers for this service
+// CommandHandlers Return the list of command handlers for this service
 var CommandHandlers = handler.CommandHandlers()
 
-// Returns this service's configuration
+// Service Returns this service's configuration
 // Returns nil if the service parameters doesn't exist in the app/service.service_types
 func Service() *parameter.Service {
 	service, _ := parameter.Inprocess(parameter.STORAGE)
 	return service
 }
 
-// Start the SDS Storage core service.
+// Run Start the SDS Storage core service.
 // It keeps the storage data:
 // - smartcontract abi
 // - smartcontract information

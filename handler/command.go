@@ -3,7 +3,7 @@
 package handler
 
 import (
-	"github.com/blocklords/sds/service/communication/command"
+	"github.com/Seascape-Foundation/sds-service-lib/communication/command"
 )
 
 const (
