@@ -17,7 +17,7 @@ func (a *Abi) Insert(dbInterface interface{}) error {
 	request := handler.DatabaseQueryRequest{
 		Fields:    []string{"abi_id", "body"},
 		Tables:    []string{"abi"},
-		Arguments: []interface{}{a.Id, data_type.AddJsonPrefix(a.Bytes)},
+		Arguments: []interface{}{a.Id, data_type.AddJsonPrefix([]byte(a.Body))},
 	}
 	var reply handler.InsertReply
 
@@ -70,7 +70,7 @@ func (a *Abi) Select(dbInterface interface{}) error {
 	dbClient := dbInterface.(*remote.ClientSocket)
 
 	request := handler.DatabaseQueryRequest{
-		Fields:    []string{"abi_id"},
+		Where:     "abi_id=?",
 		Tables:    []string{"abi"},
 		Arguments: []interface{}{a.Id},
 	}
@@ -78,7 +78,7 @@ func (a *Abi) Select(dbInterface interface{}) error {
 
 	err := handler.SelectRow.Request(dbClient, request, &reply)
 	if err != nil {
-		return fmt.Errorf("handler.SELECT_ALL.Push: %w", err)
+		return fmt.Errorf("handler.SELECT_ROW.Push: %w", err)
 	}
 
 	abi, err := New(reply.Outputs)
@@ -86,7 +86,7 @@ func (a *Abi) Select(dbInterface interface{}) error {
 		return fmt.Errorf("failed to parse the database reply into Abi: %w", err)
 	}
 	a.Id = abi.Id
-	a.Bytes = abi.Bytes
+	a.Body = abi.Body
 
 	return err
 }

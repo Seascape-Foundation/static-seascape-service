@@ -37,7 +37,7 @@ var AbiGet = func(request message.Request, _ log.Logger, extensions remote.Clien
 	}
 
 	dbCon := remote.GetClient(extensions, "database")
-	var selectedAbi = abi.Abi{}
+	var selectedAbi = abi.Abi{Id: reqParameters.Id}
 	saveErr := selectedAbi.Select(dbCon)
 	if saveErr != nil {
 		return message.Fail("database error:" + saveErr.Error())
@@ -69,7 +69,7 @@ func AbiRegister(request message.Request, _ log.Logger, extensions remote.Client
 	if err != nil {
 		return message.Fail("abi.NewFromInterface: " + err.Error())
 	}
-	if len(newAbi.Bytes) == 0 {
+	if len(newAbi.Body) == 0 {
 		return message.Fail("body is empty")
 	}
 

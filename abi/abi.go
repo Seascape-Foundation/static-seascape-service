@@ -12,8 +12,8 @@ import (
 )
 
 type Abi struct {
-	Bytes []byte `json:"bytes"`
-	Id    string `json:"id"`
+	Body string `json:"body"`
+	Id   string `json:"abi_id"`
 }
 
 // ToString Returns the abi content as a string.
@@ -24,7 +24,7 @@ func (a *Abi) ToString() string {
 	if err := a.formatBytes(); err != nil {
 		return ""
 	}
-	return string(a.Bytes)
+	return a.Body
 }
 
 // GenerateId Creates the abi hash from the abi body
@@ -43,7 +43,7 @@ func (a *Abi) GenerateId() error {
 	if err := a.formatBytes(); err != nil {
 		return fmt.Errorf("format_bytes: %w", err)
 	}
-	encoded := sha256.Sum256(a.Bytes)
+	encoded := sha256.Sum256([]byte(a.Body))
 	a.Id = hex.EncodeToString(encoded[0:8])
 
 	return nil
@@ -60,7 +60,7 @@ func (a *Abi) formatBytes() error {
 	if err != nil {
 		return fmt.Errorf("failed to re-serialize: %w", err)
 	}
-	a.Bytes = bytes
+	a.Body = string(bytes)
 
 	return nil
 }
@@ -68,7 +68,7 @@ func (a *Abi) formatBytes() error {
 // Interface Get the interface from the bytes
 // It converts the bytes into the JSON value
 func (a *Abi) Interface(body interface{}) error {
-	err := data_type.Deserialize(a.Bytes, body)
+	err := data_type.Deserialize([]byte(a.Body), body)
 	if err != nil {
 		return fmt.Errorf("data_type.Deserialize: %w", err)
 	}
