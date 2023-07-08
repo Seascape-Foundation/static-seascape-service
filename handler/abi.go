@@ -41,7 +41,7 @@ var AbiGet = func(request message.Request, _ log.Logger, extensions remote.Clien
 	var crud database.Crud = &selectedAbi
 	saveErr := crud.Select(dbCon, &selectedAbi)
 	if saveErr != nil {
-		return message.Fail("database error:" + err.Error())
+		return message.Fail("database error:" + saveErr.Error())
 	}
 
 	replyMessage, err := command.Reply(selectedAbi)
@@ -83,7 +83,7 @@ func AbiRegister(request message.Request, _ log.Logger, extensions remote.Client
 	var crud database.Crud = newAbi
 	saveErr := crud.Insert(dbCon)
 	if saveErr != nil {
-		return message.Fail("database error:" + err.Error())
+		return message.Fail("database error:" + saveErr.Error())
 	}
 
 	return replyMessage
