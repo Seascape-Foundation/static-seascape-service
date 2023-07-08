@@ -126,8 +126,8 @@ func (suite *TestSmartcontractDbSuite) TestSmartcontract() {
 	suite.Require().Error(err)
 
 	sample_abi := abi.Abi{
-		Bytes: []byte("[{}]"),
-		Id:    suite.smartcontract.AbiId,
+		Body: []byte("[{}]"),
+		Id:   suite.smartcontract.AbiId,
 	}
 	err = sample_abi.Insert(suite.db_con)
 	suite.Require().NoError(err)

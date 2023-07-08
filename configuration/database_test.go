@@ -101,8 +101,8 @@ func (suite *TestConfigurationDbSuite) SetupTest() {
 	// add the storage abi
 	abiId := "base64="
 	sampleAbi := abi.Abi{
-		Bytes: []byte("[{}]"),
-		Id:    abiId,
+		Body: []byte("[{}]"),
+		Id:   abiId,
 	}
 	err = sampleAbi.Insert(suite.dbCon)
 	suite.Require().NoError(err)
