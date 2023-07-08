@@ -124,7 +124,7 @@ func (sm *Smartcontract) SelectAll(dbInterface interface{}, returnValues interfa
 // Select Not implemented common/data_type/database.Crud interface
 //
 // Returns an error
-func (sm *Smartcontract) Select(_ interface{}, _ interface{}) error {
+func (sm *Smartcontract) Select(_ interface{}) error {
 	return fmt.Errorf("not implemented")
 }
 

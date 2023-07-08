@@ -66,8 +66,29 @@ func (a *Abi) SelectAll(dbInterface interface{}, returnValues interface{}) error
 // Select Not implemented common/data_type/database.Crud interface
 //
 // Returns an error
-func (a *Abi) Select(_ interface{}, _ interface{}) error {
-	return fmt.Errorf("not implemented")
+func (a *Abi) Select(dbInterface interface{}) error {
+	dbClient := dbInterface.(*remote.ClientSocket)
+
+	request := handler.DatabaseQueryRequest{
+		Fields:    []string{"abi_id"},
+		Tables:    []string{"abi"},
+		Arguments: []interface{}{a.Id},
+	}
+	var reply handler.SelectRowReply
+
+	err := handler.SelectRow.Request(dbClient, request, &reply)
+	if err != nil {
+		return fmt.Errorf("handler.SELECT_ALL.Push: %w", err)
+	}
+
+	abi, err := New(reply.Outputs)
+	if err != nil {
+		return fmt.Errorf("failed to parse the database reply into Abi: %w", err)
+	}
+	a.Id = abi.Id
+	a.Bytes = abi.Bytes
+
+	return err
 }
 
 // SelectAllByCondition Not implemented common/data_type/database.Crud interface

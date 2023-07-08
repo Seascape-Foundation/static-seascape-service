@@ -60,8 +60,7 @@ var SmartcontractGet = func(request message.Request, _ log.Logger, clients remot
 	dbCon := remote.GetClient(clients, "database")
 
 	var selected = smartcontract.Smartcontract{}
-	var crud database.Crud = &selected
-	err = crud.Select(dbCon, &selected)
+	err = selected.Select(dbCon)
 	if err != nil {
 		return message.Fail("failed to get configuration from the database: " + err.Error())
 	}

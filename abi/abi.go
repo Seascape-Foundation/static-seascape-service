@@ -30,7 +30,8 @@ func (a *Abi) ToString() string {
 // GenerateId Creates the abi hash from the abi body
 // The Abi ID is the unique identifier of the abi
 //
-// Abi ID is the first 8 characters of the
+//	ID is the first 8 characters of the
+//
 // sha256 checksum
 // representation of the abi.
 //

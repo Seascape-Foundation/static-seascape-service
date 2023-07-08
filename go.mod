@@ -19,7 +19,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.0 // indirect
 	github.com/Seascape-Foundation/mysql-seascape-extension v0.0.0-20230707132050-a36b3833e576 // indirect
 	github.com/Seascape-Foundation/sds-common-lib v0.0.0-20230706114026-ffdae7101871 // indirect
-	github.com/Seascape-Foundation/sds-service-lib v0.0.0-20230706124111-40083a479bba // indirect
+	github.com/Seascape-Foundation/sds-service-lib v0.0.0-20230707143202-f970e8bf974d // indirect
 	github.com/armon/go-metrics v0.4.0 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/cenkalti/backoff/v3 v3.0.0 // indirect

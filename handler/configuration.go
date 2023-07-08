@@ -61,8 +61,7 @@ func ConfigurationGet(request message.Request, _ log.Logger, clients remote.Clie
 	dbCon := remote.GetClient(clients, "database")
 
 	var selectedConf = configuration.Configuration{}
-	var crud database.Crud = &selectedConf
-	err = crud.Select(dbCon, &selectedConf)
+	err = selectedConf.Select(dbCon)
 	if err != nil {
 		return message.Fail("failed to get configuration from the database: " + err.Error())
 	}

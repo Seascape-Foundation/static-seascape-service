@@ -86,7 +86,7 @@ func (c *Configuration) SelectAll(dbInterface interface{}, returnValues interfac
 // Select Not implemented common/data_type/database.Crud interface
 //
 // Returns an error
-func (c *Configuration) Select(_ interface{}, _ interface{}) error {
+func (c *Configuration) Select(_ interface{}) error {
 	return fmt.Errorf("not implemented")
 }
 

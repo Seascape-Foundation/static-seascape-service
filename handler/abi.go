@@ -38,8 +38,7 @@ var AbiGet = func(request message.Request, _ log.Logger, extensions remote.Clien
 
 	dbCon := remote.GetClient(extensions, "database")
 	var selectedAbi = abi.Abi{}
-	var crud database.Crud = &selectedAbi
-	saveErr := crud.Select(dbCon, &selectedAbi)
+	saveErr := selectedAbi.Select(dbCon)
 	if saveErr != nil {
 		return message.Fail("database error:" + saveErr.Error())
 	}
