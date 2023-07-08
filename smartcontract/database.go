@@ -2,11 +2,10 @@ package smartcontract
 
 import (
 	"fmt"
+	"github.com/Seascape-Foundation/sds-common-lib/topic"
 
 	"github.com/Seascape-Foundation/mysql-seascape-extension/handler"
-	"github.com/Seascape-Foundation/sds-common-lib/blockchain"
 	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
-	"github.com/Seascape-Foundation/sds-common-lib/smartcontract_key"
 	"github.com/Seascape-Foundation/sds-service-lib/remote"
 )
 
@@ -16,24 +15,20 @@ import (
 func (sm *Smartcontract) Insert(dbInterface interface{}) error {
 	db := dbInterface.(*remote.ClientSocket)
 	request := handler.DatabaseQueryRequest{
-		Fields: []string{"network_id",
-			"address",
-			"abi_id",
+		Fields: []string{
+			"topic_id",
 			"transaction_id",
-			"transaction_index",
-			"block_number",
-			"block_timestamp",
-			"deployer"},
+			"owner",
+			"verifier",
+			"specific",
+		},
 		Tables: []string{"smartcontract"},
 		Arguments: []interface{}{
-			sm.SmartcontractKey.NetworkId,
-			sm.SmartcontractKey.Address,
-			sm.AbiId,
-			sm.TransactionKey.Id,
-			sm.TransactionKey.Index,
-			sm.BlockHeader.Number,
-			sm.BlockHeader.Timestamp,
-			sm.Deployer,
+			sm.TopicId,
+			sm.TransactionId,
+			sm.Owner,
+			sm.Verifier,
+			sm.Specific,
 		},
 	}
 	var reply handler.InsertReply
@@ -58,14 +53,11 @@ func (sm *Smartcontract) SelectAll(dbInterface interface{}, returnValues interfa
 
 	request := handler.DatabaseQueryRequest{
 		Fields: []string{
-			"network_id",
-			"address",
-			"abi_id",
+			"topic_id",
 			"transaction_id",
-			"transaction_index",
-			"block_number",
-			"block_timestamp",
-			"deployer",
+			"owner",
+			"verifier",
+			"specific",
 		},
 		Tables: []string{"smartcontract"},
 	}
@@ -81,37 +73,41 @@ func (sm *Smartcontract) SelectAll(dbInterface interface{}, returnValues interfa
 	// Loop through rows, using Scan to assign column data to struct fields.
 	for i, raw := range reply.Rows {
 		var sm = Smartcontract{
-			SmartcontractKey: smartcontract_key.Key{},
-			TransactionKey:   blockchain.TransactionKey{},
-			BlockHeader:      blockchain.BlockHeader{},
+			TopicId:       topic.AsTopicString(""),
+			TransactionId: "",
+			Owner:         "",
+			Verifier:      "",
+			Specific:      key_value.Empty(),
 		}
 
-		err := raw.Interface(&sm.SmartcontractKey)
+		topicId, err := raw.GetString("topic_id")
 		if err != nil {
-			return fmt.Errorf("raw.ToInterface(SmartcontractKey): %w", err)
+			return fmt.Errorf("failed to extract topic_id from database result: %w", err)
+		}
+		sm.TopicId = topic.AsTopicString(topicId)
+
+		sm.Specific, err = raw.GetKeyValue("specific")
+		if err != nil {
+			return fmt.Errorf("raw.GetKeyValue(specific): %w", err)
 		}
 
-		err = raw.Interface(&sm.BlockHeader)
+		owner, err := raw.GetString("owner")
 		if err != nil {
-			return fmt.Errorf("raw.ToInterface(BlockHeader): %w", err)
+			return fmt.Errorf("failed to extract owner from database result: %w", err)
 		}
+		sm.Owner = owner
 
-		err = raw.Interface(&sm.TransactionKey)
+		verifier, err := raw.GetString("verifier")
 		if err != nil {
-			return fmt.Errorf("raw.ToInterface(TransactionKey): %w", err)
+			return fmt.Errorf("failed to extract verifier from database result: %w", err)
 		}
+		sm.Verifier = verifier
 
-		deployer, err := raw.GetString("deployer")
+		transactionId, err := raw.GetString("transaction_id")
 		if err != nil {
-			return fmt.Errorf("failed to extract deployer from database result: %w", err)
+			return fmt.Errorf("failed to extract transaction_id from database result: %w", err)
 		}
-		sm.Deployer = deployer
-
-		abiId, err := raw.GetString("abi_id")
-		if err != nil {
-			return fmt.Errorf("failed to extract abi id from database result: %w", err)
-		}
-		sm.AbiId = abiId
+		sm.TransactionId = transactionId
 
 		(*smartcontracts)[i] = &sm
 	}

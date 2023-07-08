@@ -287,9 +287,9 @@ func SmartcontractKeyFilter(request message.Request, _ log.Logger, parameters ..
 	}
 
 	keys := make([]smartcontract_key.Key, len(smartcontracts))
-	for i, sm := range smartcontracts {
-		keys[i] = sm.SmartcontractKey
-	}
+	//for i, sm := range smartcontracts {
+	//keys[i] = sm.SmartcontractKey
+	//}
 
 	reply := FilterSmartcontractKeysReply{
 		SmartcontractKeys: keys,

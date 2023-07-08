@@ -3,44 +3,58 @@ package smartcontract
 
 import (
 	"fmt"
-
-	"github.com/Seascape-Foundation/sds-common-lib/blockchain"
-	"github.com/Seascape-Foundation/sds-common-lib/smartcontract_key"
+	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
+	"github.com/Seascape-Foundation/sds-common-lib/topic"
 )
 
-// The storage smartcontract
+// Smartcontract The storage smartcontract
 // It keeps the read-only parameters such as
 // associated ABI, deployer, address, block parameter as well as the transaction
 // where it was deployed.
 //
 // The Database interaction depends on the sds/storage/abi
 type Smartcontract struct {
-	SmartcontractKey smartcontract_key.Key     `json:"key"`
-	AbiId            string                    `json:"abi_id"`
-	TransactionKey   blockchain.TransactionKey `json:"transaction_key"`
-	BlockHeader      blockchain.BlockHeader    `json:"block_header"`
-	Deployer         string                    `json:"deployer"`
+	// Topic keeps the information about the smartcontract
+	// The topic string should be unique for each smartcontract
+	// At least the following parameters are required to be:
+	// - organization (team, developer)
+	// - project  (dapp name)
+	// - group (classification, for example: nft, token)
+	// - network id (network where the smartcontract was deployed)
+	// - name (smartcontract name. recommended that it matches to the file name)
+	TopicId       topic.String `json:"topic_id"`
+	TransactionId string       `json:"transaction_id"`
+	Owner         string       `json:"owner,omitempty"`
+	Verifier      string       `json:"verifier,omitempty"`
+	// Specific parameters of the smartcontract based on the network.
+	//
+	// For example, Ethereum's data:
+	// - abiId
+	// - address
+	//
+	// Sui blockchain's:
+	// - packageId
+	// - moduleId
+	// - resourceId <optional>
+	// - resourceType
+	Specific key_value.KeyValue `json:"specific"`
 }
 
 func (sm *Smartcontract) Validate() error {
-	err := sm.SmartcontractKey.Validate()
-	if err != nil {
-		return fmt.Errorf("SmartcontractKey.Validate: %w", err)
+	if len(sm.TopicId) == 0 {
+		return fmt.Errorf("no topic id")
+	} else {
+		topic, err := topic.ParseString(sm.TopicId)
+		if err != nil {
+			return fmt.Errorf("topic.ParseString: %w", err)
+		}
+		if err := topic.Validate(); err != nil {
+			return fmt.Errorf("topic.Validate: %w", err)
+		}
 	}
 
-	if len(sm.AbiId) == 0 {
-		return fmt.Errorf("the AbiId is missing")
-	}
-	if len(sm.Deployer) == 0 {
-		return fmt.Errorf("the Deployer is missing")
-	}
-
-	if err := sm.TransactionKey.Validate(); err != nil {
-		return fmt.Errorf("TransactionKey.Validate: %w", err)
-	}
-
-	if err := sm.BlockHeader.Validate(); err != nil {
-		return fmt.Errorf("BlockHeader.Validate: %w", err)
+	if len(sm.TransactionId) == 0 {
+		return fmt.Errorf("missing TransactionId")
 	}
 
 	return nil
