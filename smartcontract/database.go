@@ -16,7 +16,7 @@ func (sm *Smartcontract) Insert(dbInterface interface{}) error {
 	db := dbInterface.(*remote.ClientSocket)
 	request := handler.DatabaseQueryRequest{
 		Fields: []string{
-			"topic_id",
+			"topic",
 			"transaction_id",
 			"owner",
 			"verifier",
@@ -24,7 +24,7 @@ func (sm *Smartcontract) Insert(dbInterface interface{}) error {
 		},
 		Tables: []string{"smartcontract"},
 		Arguments: []interface{}{
-			sm.TopicId,
+			sm.Topic.Id(),
 			sm.TransactionId,
 			sm.Owner,
 			sm.Verifier,
@@ -53,7 +53,7 @@ func (sm *Smartcontract) SelectAll(dbInterface interface{}, returnValues interfa
 
 	request := handler.DatabaseQueryRequest{
 		Fields: []string{
-			"topic_id",
+			"topic",
 			"transaction_id",
 			"owner",
 			"verifier",
@@ -73,7 +73,7 @@ func (sm *Smartcontract) SelectAll(dbInterface interface{}, returnValues interfa
 	// Loop through rows, using Scan to assign column data to struct fields.
 	for i, raw := range reply.Rows {
 		var sm = Smartcontract{
-			TopicId:       topic.AsTopicString(""),
+			Topic:         topic.Topic{},
 			TransactionId: "",
 			Owner:         "",
 			Verifier:      "",
@@ -84,7 +84,10 @@ func (sm *Smartcontract) SelectAll(dbInterface interface{}, returnValues interfa
 		if err != nil {
 			return fmt.Errorf("failed to extract topic_id from database result: %w", err)
 		}
-		sm.TopicId = topic.AsTopicString(topicId)
+		sm.Topic, err = topic.Id(topicId).Unmarshal()
+		if err != nil {
+			return fmt.Errorf("failed to decode data into topic")
+		}
 
 		sm.Specific, err = raw.GetKeyValue("specific")
 		if err != nil {
