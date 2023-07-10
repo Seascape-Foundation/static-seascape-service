@@ -47,3 +47,7 @@ func (sm *Smartcontract) Validate() error {
 
 	return nil
 }
+
+func (sm *Smartcontract) Id() topic.Id {
+	return sm.Topic.Id().Only("org", "net", "name")
+}

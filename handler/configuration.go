@@ -54,13 +54,15 @@ func ConfigurationGet(request message.Request, _ log.Logger, clients remote.Clie
 	if err := confTopic.Validate(); err != nil {
 		return message.Fail("invalid topic: " + err.Error())
 	}
-	if confTopic.Level() != topic.SmartcontractLevel {
-		return message.Fail("topic level is not at SMARTCONTRACT LEVEL")
+	if !confTopic.Has("org", "proj") {
+		return message.Fail("missing org or proj property in the topic")
 	}
 
 	dbCon := remote.GetClient(clients, "database")
 
-	var selectedConf = configuration.Configuration{}
+	var selectedConf = configuration.Configuration{
+		Id: confTopic,
+	}
 	err = selectedConf.Select(dbCon)
 	if err != nil {
 		return message.Fail("failed to get configuration from the database: " + err.Error())

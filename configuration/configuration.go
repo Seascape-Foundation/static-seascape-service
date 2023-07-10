@@ -12,19 +12,25 @@ import (
 //
 // The database part depends on the Storage Smartcontract
 type Configuration struct {
-	Topic   topic.Topic `json:"topic"`
-	Address string      `json:"address"`
+	Id             topic.Topic   `json:"id"`
+	Smartcontracts []topic.Topic `json:"smartcontract"`
 }
 
 func (c *Configuration) Validate() error {
-	if err := c.Topic.Validate(); err != nil {
+	if err := c.Id.Validate(); err != nil {
 		return fmt.Errorf("Topic.Validate: %w", err)
 	}
-	if c.Topic.Level() != topic.SmartcontractLevel {
-		return fmt.Errorf("Topic.Level is not smartcontract level")
+	if !c.Id.Has("org", "proj") {
+		return fmt.Errorf("topic id should missing org or proj")
 	}
-	if len(c.Address) == 0 {
+	if len(c.Smartcontracts) == 0 {
 		return fmt.Errorf("missing Address parameter")
+	}
+
+	for _, topicId := range c.Smartcontracts {
+		if !topicId.Has("org", "net", "name") {
+			return fmt.Errorf("smartcontract is missing org, net and name")
+		}
 	}
 
 	return nil

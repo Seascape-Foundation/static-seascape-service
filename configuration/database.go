@@ -16,11 +16,17 @@ import (
 //
 // Implements common/data_type/database.Crud interface
 func (c *Configuration) Insert(dbInterface interface{}) error {
+	ids := make([]topic.Id, len(c.Smartcontracts))
+
+	for i, sm := range c.Smartcontracts {
+		ids[i] = sm.Id()
+	}
+
 	db := dbInterface.(*remote.ClientSocket)
 	request := handler.DatabaseQueryRequest{
-		Fields:    []string{"organization", "project", "network_id", "group_name", "smartcontract_name", "address"},
+		Fields:    []string{"id", "smartcontracts"},
 		Tables:    []string{"configuration"},
-		Arguments: []interface{}{c.Topic.Organization, c.Topic.Project, c.Topic.NetworkId, c.Topic.Group, c.Topic.Smartcontract, c.Address},
+		Arguments: []interface{}{c.Id.Id(), ids},
 	}
 	var reply handler.InsertReply
 
