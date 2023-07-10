@@ -50,12 +50,8 @@ func (c *Configuration) SelectAll(dbInterface interface{}, returnValues interfac
 
 	request := handler.DatabaseQueryRequest{
 		Fields: []string{
-			"organization as o",
-			"project as p",
-			"network_id as n",
-			"group_name as g",
-			"smartcontract_name as s",
-			"address",
+			"id",
+			"smartcontracts",
 		},
 		Tables: []string{"configuration"},
 	}
@@ -70,15 +66,32 @@ func (c *Configuration) SelectAll(dbInterface interface{}, returnValues interfac
 
 	// Loop through rows, using Scan to assign column data to struct fields.
 	for i, raw := range reply.Rows {
-		confTopic, err := topic.ParseJSON(raw)
+		idString, err := raw.GetString("id")
 		if err != nil {
 			return fmt.Errorf("parsing topic parameters from database result failed: %w", err)
 		}
-		address, err := raw.GetString("address")
+		confId := topic.Id(idString)
+		confTopic, err := confId.Unmarshal()
+		if err != nil {
+			return fmt.Errorf("failed to convert configuration id %s to topic: %w", confId, err)
+		}
+
+		idStrings, err := raw.GetStringList("smartcontracts")
 		if err != nil {
 			return fmt.Errorf("parsing address parameter from database result failed: %w", err)
 		}
-		conf, err := NewFromTopic(*confTopic, address)
+		smartcontracts := make([]topic.Topic, len(idStrings))
+
+		for i, idString := range idStrings {
+			smartcontractId := topic.Id(idString)
+			smartcontractTopic, err := smartcontractId.Unmarshal()
+			if err != nil {
+				return fmt.Errorf("failed to convert smartcontract id %s to topic in conf %s: %w", smartcontractId, confId, err)
+			}
+			smartcontracts[i] = smartcontractTopic
+		}
+
+		conf, err := NewFromTopic(confTopic, smartcontracts)
 		if err != nil {
 			return fmt.Errorf("NewFromTopic: %w", err)
 		}

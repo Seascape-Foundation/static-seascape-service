@@ -9,13 +9,13 @@ import (
 
 // NewFromTopic Converts the Topic to the Configuration
 // Note that you should set the address as well
-func NewFromTopic(t topic.Topic, address string) (*Configuration, error) {
+func NewFromTopic(id topic.Topic, smartcontracts []topic.Topic) (*Configuration, error) {
 	c := &Configuration{
-		Topic:   t,
-		Address: address,
+		Id:             id,
+		Smartcontracts: smartcontracts,
 	}
 	if err := c.Validate(); err != nil {
-		return nil, fmt.Errorf("Validate: %w", err)
+		return nil, fmt.Errorf("validate: %w", err)
 	}
 
 	return c, nil
@@ -30,7 +30,7 @@ func New(parameters key_value.KeyValue) (*Configuration, error) {
 	}
 
 	if err := conf.Validate(); err != nil {
-		return nil, fmt.Errorf("Validate: %w", err)
+		return nil, fmt.Errorf("validate: %w", err)
 	}
 
 	return &conf, nil

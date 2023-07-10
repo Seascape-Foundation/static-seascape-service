@@ -18,13 +18,13 @@ import (
 type FilterSmartcontractsRequest = topic.Filter
 type FilterSmartcontractsReply struct {
 	Smartcontracts []*smartcontract.Smartcontract `json:"smartcontracts"`
-	TopicStrings   []topic.String                 `json:"topic_strings"`
+	TopicStrings   []topic.Id                     `json:"topic_strings"`
 }
 
 type FilterSmartcontractKeysRequest = topic.Filter
 type FilterSmartcontractKeysReply struct {
 	SmartcontractKeys []smartcontract_key.Key `json:"smartcontract_keys"`
-	TopicStrings      []topic.String          `json:"topic_strings"`
+	TopicStrings      []topic.Id              `json:"topic_strings"`
 }
 
 func filterOrganization(configurations *key_value.List, paths []string) *key_value.List {
@@ -42,7 +42,7 @@ func filterOrganization(configurations *key_value.List, paths []string) *key_val
 		conf := value.(*configuration.Configuration)
 
 		for _, path := range paths {
-			if conf.Topic.Organization == path {
+			if conf.Id.Organization == path {
 				_ = filtered.Add(key, value)
 				break
 			}
@@ -67,7 +67,7 @@ func filterProject(configurations *key_value.List, paths []string) *key_value.Li
 		conf := value.(*configuration.Configuration)
 
 		for _, path := range paths {
-			if conf.Topic.Project == path {
+			if conf.Id.Project == path {
 				_ = filtered.Add(key, value)
 				break
 			}
@@ -92,7 +92,7 @@ func filterNetworkId(configurations *key_value.List, paths []string) *key_value.
 		conf := value.(*configuration.Configuration)
 
 		for _, path := range paths {
-			if conf.Topic.NetworkId == path {
+			if conf.Id.NetworkId == path {
 				_ = filtered.Add(key, value)
 				break
 			}
@@ -117,7 +117,7 @@ func filterGroup(configurations *key_value.List, paths []string) *key_value.List
 		conf := value.(*configuration.Configuration)
 
 		for _, path := range paths {
-			if conf.Topic.Group == path {
+			if conf.Id.Group == path {
 				_ = filtered.Add(key, value)
 				break
 			}
@@ -142,7 +142,7 @@ func filterSmartcontractName(configurations *key_value.List, paths []string) *ke
 		conf := value.(*configuration.Configuration)
 
 		for _, path := range paths {
-			if conf.Topic.Smartcontract == path {
+			if conf.Id.Name == path {
 				_ = filtered.Add(key, value)
 				break
 			}
@@ -189,13 +189,13 @@ func filterConfiguration(configurationList *key_value.List, topicFilter *topic.F
 
 func filterSmartcontract(
 	configurations []*configuration.Configuration,
-	list *key_value.List) ([]*smartcontract.Smartcontract, []topic.String, error) {
+	list *key_value.List) ([]*smartcontract.Smartcontract, []topic.Id, error) {
 
 	smartcontracts := make([]*smartcontract.Smartcontract, 0)
-	topicStrings := make([]topic.String, 0)
+	topicStrings := make([]topic.Id, 0)
 
 	for _, conf := range configurations {
-		key, err := smartcontract_key.New(conf.Topic.NetworkId, conf.Address)
+		key, err := smartcontract_key.New(conf.Id.NetworkId, conf.Smartcontracts[0].Name)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to create smartcontract key: %w", err)
 		}
@@ -208,7 +208,7 @@ func filterSmartcontract(
 		sm := value.(*smartcontract.Smartcontract)
 
 		smartcontracts = append(smartcontracts, sm)
-		topicStrings = append(topicStrings, conf.Topic.String(topic.SmartcontractLevel))
+		topicStrings = append(topicStrings, conf.Id.Id())
 	}
 
 	return smartcontracts, topicStrings, nil
@@ -227,7 +227,7 @@ func SmartcontractFilter(request message.Request, _ log.Logger, parameters ...in
 	if len(configurations) == 0 {
 		reply := FilterSmartcontractsReply{
 			Smartcontracts: []*smartcontract.Smartcontract{},
-			TopicStrings:   []topic.String{},
+			TopicStrings:   []topic.Id{},
 		}
 		replyMessage, err := command.Reply(&reply)
 		if err != nil {
@@ -271,7 +271,7 @@ func SmartcontractKeyFilter(request message.Request, _ log.Logger, parameters ..
 	if len(configurations) == 0 {
 		reply := FilterSmartcontractKeysReply{
 			SmartcontractKeys: []smartcontract_key.Key{},
-			TopicStrings:      []topic.String{},
+			TopicStrings:      []topic.Id{},
 		}
 		replyMessage, err := command.Reply(&reply)
 		if err != nil {
