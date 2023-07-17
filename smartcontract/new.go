@@ -3,7 +3,7 @@ package smartcontract
 import (
 	"fmt"
 
-	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
+	"github.com/ahmetson/common-lib/data_type/key_value"
 )
 
 // New Creates a new storage/smartcontract from the JSON

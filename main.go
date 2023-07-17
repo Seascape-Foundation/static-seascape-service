@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/Seascape-Foundation/sds-service-lib/configuration"
-	"github.com/Seascape-Foundation/sds-service-lib/controller"
-	"github.com/Seascape-Foundation/sds-service-lib/independent"
-	"github.com/Seascape-Foundation/sds-service-lib/log"
-	"github.com/Seascape-Foundation/static-seascape-service/handler"
+	"github.com/ahmetson/service-lib/configuration"
+	"github.com/ahmetson/service-lib/controller"
+	"github.com/ahmetson/service-lib/independent"
+	"github.com/ahmetson/service-lib/log"
+	"github.com/ahmetson/static-service/handler"
 )
 
 func main() {

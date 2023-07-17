@@ -8,8 +8,8 @@
 package main
 
 import (
-	"github.com/Seascape-Foundation/sds-service-lib/configuration"
-	parameter "github.com/Seascape-Foundation/sds-service-lib/identity"
+	"github.com/ahmetson/service-lib/configuration"
+	parameter "github.com/ahmetson/service-lib/identity"
 )
 
 // Service Returns this service's configuration

@@ -3,12 +3,12 @@ package handler
 import (
 	"testing"
 
-	"github.com/Seascape-Foundation/sds-common-lib/blockchain"
-	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
-	"github.com/Seascape-Foundation/sds-common-lib/smartcontract_key"
-	"github.com/Seascape-Foundation/sds-service-lib/communication/message"
-	"github.com/Seascape-Foundation/sds-service-lib/log"
-	"github.com/Seascape-Foundation/static-seascape-service/smartcontract"
+	"github.com/ahmetson/common-lib/blockchain"
+	"github.com/ahmetson/common-lib/data_type/key_value"
+	"github.com/ahmetson/common-lib/smartcontract_key"
+	"github.com/ahmetson/service-lib/communication/message"
+	"github.com/ahmetson/service-lib/log"
+	"github.com/ahmetson/static-service/smartcontract"
 	"github.com/stretchr/testify/suite"
 )
 

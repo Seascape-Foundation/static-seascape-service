@@ -3,11 +3,11 @@ package handler
 import (
 	"testing"
 
-	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
-	"github.com/Seascape-Foundation/sds-common-lib/topic"
-	"github.com/Seascape-Foundation/sds-service-lib/communication/message"
-	"github.com/Seascape-Foundation/sds-service-lib/log"
-	"github.com/Seascape-Foundation/static-seascape-service/configuration"
+	"github.com/ahmetson/common-lib/data_type/key_value"
+	"github.com/ahmetson/common-lib/topic"
+	"github.com/ahmetson/service-lib/communication/message"
+	"github.com/ahmetson/service-lib/log"
+	"github.com/ahmetson/static-service/configuration"
 	"github.com/stretchr/testify/suite"
 )
 

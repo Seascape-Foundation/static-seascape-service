@@ -3,16 +3,16 @@ package handler
 import (
 	"fmt"
 
-	"github.com/Seascape-Foundation/sds-service-lib/log"
-	"github.com/Seascape-Foundation/static-seascape-service/configuration"
-	"github.com/Seascape-Foundation/static-seascape-service/smartcontract"
+	"github.com/ahmetson/service-lib/log"
+	"github.com/ahmetson/static-service/configuration"
+	"github.com/ahmetson/static-service/smartcontract"
 
-	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
-	"github.com/Seascape-Foundation/sds-common-lib/smartcontract_key"
-	"github.com/Seascape-Foundation/sds-common-lib/topic"
+	"github.com/ahmetson/common-lib/data_type/key_value"
+	"github.com/ahmetson/common-lib/smartcontract_key"
+	"github.com/ahmetson/common-lib/topic"
 
-	"github.com/Seascape-Foundation/sds-service-lib/communication/command"
-	"github.com/Seascape-Foundation/sds-service-lib/communication/message"
+	"github.com/ahmetson/service-lib/communication/command"
+	"github.com/ahmetson/service-lib/communication/message"
 )
 
 type FilterSmartcontractsRequest = topic.Filter

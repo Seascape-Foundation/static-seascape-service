@@ -4,8 +4,8 @@ package abi
 import (
 	"fmt"
 
-	"github.com/Seascape-Foundation/sds-common-lib/data_type"
-	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
+	"github.com/ahmetson/common-lib/data_type"
+	"github.com/ahmetson/common-lib/data_type/key_value"
 )
 
 // New Wraps the JSON abi interface to the internal data type.

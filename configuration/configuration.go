@@ -4,7 +4,7 @@ package configuration
 import (
 	"fmt"
 
-	"github.com/Seascape-Foundation/sds-common-lib/topic"
+	"github.com/ahmetson/common-lib/topic"
 )
 
 // Configuration The Storage Configuration is the relationship

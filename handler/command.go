@@ -3,8 +3,8 @@
 package handler
 
 import (
-	"github.com/Seascape-Foundation/sds-service-lib/communication/command"
-	"github.com/Seascape-Foundation/sds-service-lib/controller"
+	"github.com/ahmetson/service-lib/communication/command"
+	"github.com/ahmetson/service-lib/controller"
 )
 
 const (

@@ -37,7 +37,7 @@ of the smartcontract address.
 The *topic_id* is derived from with the `org`, `net` and `name` parameters:
 
 ```plain
-import "github.com/Seascape-Foundation/sds-common-lib/topic"
+import "github.com/ahmetson/common-lib/topic"
 topic.Topic{}
 ```
 

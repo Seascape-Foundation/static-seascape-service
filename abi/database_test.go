@@ -2,16 +2,16 @@ package abi
 
 import (
 	"context"
-	"github.com/Seascape-Foundation/sds-service-lib/identity"
+	"github.com/ahmetson/service-lib/identity"
 	"path/filepath"
 	"runtime"
 	"testing"
 	"time"
 
 	db "github.com/Seascape-Foundation/mysql-seascape-extension"
-	"github.com/Seascape-Foundation/sds-service-lib/configuration"
-	"github.com/Seascape-Foundation/sds-service-lib/log"
-	"github.com/Seascape-Foundation/sds-service-lib/remote"
+	"github.com/ahmetson/service-lib/configuration"
+	"github.com/ahmetson/service-lib/log"
+	"github.com/ahmetson/service-lib/remote"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
 )

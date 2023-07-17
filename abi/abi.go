@@ -8,7 +8,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/Seascape-Foundation/sds-common-lib/data_type"
+	"github.com/ahmetson/common-lib/data_type"
 )
 
 type Abi struct {

@@ -1,4 +1,4 @@
-module github.com/Seascape-Foundation/static-seascape-service
+module github.com/ahmetson/static-service
 
 go 1.19
 

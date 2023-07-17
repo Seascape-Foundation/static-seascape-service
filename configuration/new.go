@@ -3,8 +3,8 @@ package configuration
 import (
 	"fmt"
 
-	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
-	"github.com/Seascape-Foundation/sds-common-lib/topic"
+	"github.com/ahmetson/common-lib/data_type/key_value"
+	"github.com/ahmetson/common-lib/topic"
 )
 
 // NewFromTopic Converts the Topic to the Configuration

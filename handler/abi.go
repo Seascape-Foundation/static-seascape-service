@@ -1,13 +1,13 @@
 package handler
 
 import (
-	"github.com/Seascape-Foundation/sds-common-lib/data_type/database"
-	"github.com/Seascape-Foundation/sds-service-lib/communication/command"
-	"github.com/Seascape-Foundation/sds-service-lib/log"
-	"github.com/Seascape-Foundation/sds-service-lib/remote"
-	"github.com/Seascape-Foundation/static-seascape-service/abi"
+	"github.com/ahmetson/common-lib/data_type/database"
+	"github.com/ahmetson/service-lib/communication/command"
+	"github.com/ahmetson/service-lib/log"
+	"github.com/ahmetson/service-lib/remote"
+	"github.com/ahmetson/static-service/abi"
 
-	"github.com/Seascape-Foundation/sds-service-lib/communication/message"
+	"github.com/ahmetson/service-lib/communication/message"
 )
 
 type GetAbiRequest struct {

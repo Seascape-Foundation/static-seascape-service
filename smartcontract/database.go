@@ -2,11 +2,11 @@ package smartcontract
 
 import (
 	"fmt"
-	"github.com/Seascape-Foundation/sds-common-lib/topic"
+	"github.com/ahmetson/common-lib/topic"
 
 	"github.com/Seascape-Foundation/mysql-seascape-extension/handler"
-	"github.com/Seascape-Foundation/sds-common-lib/data_type/key_value"
-	"github.com/Seascape-Foundation/sds-service-lib/remote"
+	"github.com/ahmetson/common-lib/data_type/key_value"
+	"github.com/ahmetson/service-lib/remote"
 )
 
 // Insert Inserts the smartcontract into the database
