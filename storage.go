@@ -56,7 +56,7 @@ func Run(_ *configuration.Config) {
 	//}
 	//abi_list := key_value.NewList()
 	//for _, abi := range abis {
-	//	err := abi_list.Add(abi.Id, abi)
+	//	err := abi_list.Add(abi.Topic, abi)
 	//	if err != nil {
 	//		logger.Fatal("abi_list.Add: %w", err)
 	//	}
