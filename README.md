@@ -1,17 +1,18 @@
-# Static Seascape Service
+# Static Service
 
-This is a standalone service to store the dapp
-configurations remotely and then retrieve
-them from the clients.
+> Reference https://docs.google.com/document/d/1QV3K0fMbFkGOrqRnfwm5QbXkwtXoQVFfnMDYvhXDzhY/edit?usp=sharing
+
+Independent service that stores the information
+about your project on the storage.
 
 There are multiple types of the storage that 
 this service could use. The storages are
 plugged using `database` extensions.
 
-## AliOss Extension
-**Static Seascape Service** along with 
-**AliOss Seascape Extension** stores the data
-on https://seascape.network/.
+## W3Storage Extension
+**Static Service** along with 
+**W3storage Extension** stores the data
+on IPFS using web3.storage.
 
 Below are the list of the routes for public access.
 
