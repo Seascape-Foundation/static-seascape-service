@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/ahmetson/common-lib/topic"
 
-	"github.com/Seascape-Foundation/mysql-seascape-extension/handler"
 	"github.com/ahmetson/common-lib/data_type/key_value"
+	databaseExtension "github.com/ahmetson/service-lib/extension/database"
 	"github.com/ahmetson/service-lib/remote"
 )
 
@@ -14,7 +14,7 @@ import (
 // Implements common/data_type/database.Crud interface
 func (sm *Smartcontract) Insert(dbInterface interface{}) error {
 	db := dbInterface.(*remote.ClientSocket)
-	request := handler.DatabaseQueryRequest{
+	request := databaseExtension.QueryRequest{
 		Fields: []string{
 			"topic",
 			"transaction_id",
@@ -31,11 +31,11 @@ func (sm *Smartcontract) Insert(dbInterface interface{}) error {
 			sm.Specific,
 		},
 	}
-	var reply handler.InsertReply
+	var reply databaseExtension.InsertReply
 
-	err := handler.INSERT.Request(db, request, &reply)
+	err := databaseExtension.Insert.Request(db, request, &reply)
 	if err != nil {
-		return fmt.Errorf("handler.INSERT.Request: %w", err)
+		return fmt.Errorf("databaseExtension.INSERT.Request: %w", err)
 	}
 	return nil
 }
@@ -51,7 +51,7 @@ func (sm *Smartcontract) SelectAll(dbInterface interface{}, returnValues interfa
 		return fmt.Errorf("return_values.(*[]*Smartcontract)")
 	}
 
-	request := handler.DatabaseQueryRequest{
+	request := databaseExtension.QueryRequest{
 		Fields: []string{
 			"topic",
 			"transaction_id",
@@ -61,11 +61,11 @@ func (sm *Smartcontract) SelectAll(dbInterface interface{}, returnValues interfa
 		},
 		Tables: []string{"smartcontract"},
 	}
-	var reply handler.SelectAllReply
+	var reply databaseExtension.SelectAllReply
 
-	err := handler.SelectAll.Request(db, request, &reply)
+	err := databaseExtension.SelectAll.Request(db, request, &reply)
 	if err != nil {
-		return fmt.Errorf("handler.SELECT_ALL.Request: %w", err)
+		return fmt.Errorf("databaseExtension.SELECT_ALL.Request: %w", err)
 	}
 
 	*smartcontracts = make([]*Smartcontract, len(reply.Rows))

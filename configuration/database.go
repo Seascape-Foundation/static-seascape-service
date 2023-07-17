@@ -3,9 +3,9 @@ package configuration
 import (
 	"fmt"
 
-	"github.com/Seascape-Foundation/mysql-seascape-extension/handler"
 	"github.com/ahmetson/common-lib/data_type/key_value"
 	"github.com/ahmetson/common-lib/topic"
+	databaseExtension "github.com/ahmetson/service-lib/extension/database"
 	"github.com/ahmetson/service-lib/remote"
 )
 
@@ -23,16 +23,16 @@ func (c *Configuration) Insert(dbInterface interface{}) error {
 	}
 
 	db := dbInterface.(*remote.ClientSocket)
-	request := handler.DatabaseQueryRequest{
+	request := databaseExtension.QueryRequest{
 		Fields:    []string{"id", "smartcontracts"},
 		Tables:    []string{"configuration"},
 		Arguments: []interface{}{c.Topic.Id(), ids},
 	}
-	var reply handler.InsertReply
+	var reply databaseExtension.InsertReply
 
-	err := handler.INSERT.Request(db, request, &reply)
+	err := databaseExtension.Insert.Request(db, request, &reply)
 	if err != nil {
-		return fmt.Errorf("handler.INSERT.Request: %w", err)
+		return fmt.Errorf("databaseExtension.INSERT.Request: %w", err)
 	}
 	return nil
 }
@@ -48,18 +48,18 @@ func (c *Configuration) SelectAll(dbInterface interface{}, returnValues interfac
 		return fmt.Errorf("return_values.(*[]*Configuration)")
 	}
 
-	request := handler.DatabaseQueryRequest{
+	request := databaseExtension.QueryRequest{
 		Fields: []string{
 			"id",
 			"smartcontracts",
 		},
 		Tables: []string{"configuration"},
 	}
-	var reply handler.SelectAllReply
+	var reply databaseExtension.SelectAllReply
 
-	err := handler.SelectAll.Request(db, request, &reply)
+	err := databaseExtension.SelectAll.Request(db, request, &reply)
 	if err != nil {
-		return fmt.Errorf("handler.SELECT_ALL.Request: %w", err)
+		return fmt.Errorf("databaseExtension.SELECT_ALL.Request: %w", err)
 	}
 
 	*configurations = make([]*Configuration, len(reply.Rows))
