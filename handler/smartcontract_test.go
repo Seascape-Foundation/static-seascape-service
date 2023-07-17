@@ -3,7 +3,6 @@ package handler
 import (
 	"testing"
 
-	"github.com/ahmetson/common-lib/blockchain"
 	"github.com/ahmetson/common-lib/data_type/key_value"
 	"github.com/ahmetson/common-lib/smartcontract_key"
 	"github.com/ahmetson/service-lib/communication/message"
@@ -42,40 +41,16 @@ func (suite *TestSmartcontractSuite) SetupTest() {
 		Address:   "0xsm_key",
 	}
 
-	sm0 := smartcontract.Smartcontract{
-		SmartcontractKey: suite.sm0Key,
-		AbiId:            suite.abi0Id,
-		TransactionKey: blockchain.TransactionKey{
-			Id:    "0x1",
-			Index: 0,
-		},
-		BlockHeader: blockchain.BlockHeader{
-			Number:    blockchain.Number(1),
-			Timestamp: blockchain.Timestamp(2),
-		},
-		Deployer: "0xdeployer",
-	}
+	sm0 := smartcontract.Smartcontract{}
 	suite.sm = sm0
 
-	sm1 := smartcontract.Smartcontract{
-		SmartcontractKey: suite.sm1Key,
-		AbiId:            suite.abi0Id,
-		TransactionKey: blockchain.TransactionKey{
-			Id:    "0x1",
-			Index: 0,
-		},
-		BlockHeader: blockchain.BlockHeader{
-			Number:    blockchain.Number(1),
-			Timestamp: blockchain.Timestamp(2),
-		},
-		Deployer: "0xdeployer",
-	}
+	sm1 := smartcontract.Smartcontract{}
 
 	list := key_value.NewList()
-	err = list.Add(sm0.SmartcontractKey, &sm0)
+	err = list.Add("sm0", &sm0)
 	suite.Require().NoError(err)
 
-	err = list.Add(sm1.SmartcontractKey, &sm1)
+	err = list.Add("sm1", &sm1)
 	suite.Require().NoError(err)
 	suite.smList = list
 }
@@ -89,7 +64,7 @@ func (suite *TestSmartcontractSuite) TestGet() {
 		Command:    "",
 		Parameters: validKv,
 	}
-	reply := SmartcontractGet(request, suite.logger, nil, nil, suite.smList)
+	reply := SmartcontractGet(request, suite.logger, nil)
 	suite.Require().True(reply.IsOK())
 
 	var repliedSm GetSmartcontractReply
@@ -103,7 +78,7 @@ func (suite *TestSmartcontractSuite) TestGet() {
 		Command:    "",
 		Parameters: key_value.Empty(),
 	}
-	reply = SmartcontractGet(request, suite.logger, nil, nil, suite.smList)
+	reply = SmartcontractGet(request, suite.logger, nil)
 	suite.Require().False(reply.IsOK())
 
 	// request of smartcontract that doesn't exist in the list
@@ -114,7 +89,7 @@ func (suite *TestSmartcontractSuite) TestGet() {
 			Set("network_id", "56").
 			Set("address", "0xsm_key"),
 	}
-	reply = SmartcontractGet(request, suite.logger, nil, nil, suite.smList)
+	reply = SmartcontractGet(request, suite.logger, nil)
 	suite.Require().False(reply.IsOK())
 
 	// requesting with invalid type for abi id should fail
@@ -124,28 +99,13 @@ func (suite *TestSmartcontractSuite) TestGet() {
 			Set("network_id", 1).
 			Set("address", "0xsm_key"),
 	}
-	reply = SmartcontractGet(request, suite.logger, nil, nil, suite.smList)
+	reply = SmartcontractGet(request, suite.logger, nil)
 	suite.Require().False(reply.IsOK())
 }
 
 func (suite *TestSmartcontractSuite) TestSet() {
 	// valid request
-	validRequest := smartcontract.Smartcontract{
-		SmartcontractKey: smartcontract_key.Key{
-			NetworkId: "imx",
-			Address:   "0xnft",
-		},
-		AbiId: suite.abi0Id,
-		TransactionKey: blockchain.TransactionKey{
-			Id:    "0x1",
-			Index: 0,
-		},
-		BlockHeader: blockchain.BlockHeader{
-			Number:    blockchain.Number(1),
-			Timestamp: blockchain.Timestamp(2),
-		},
-		Deployer: "0xdeployer",
-	}
+	validRequest := smartcontract.Smartcontract{}
 	validKv, err := key_value.NewFromInterface(validRequest)
 	suite.Require().NoError(err)
 
@@ -153,7 +113,7 @@ func (suite *TestSmartcontractSuite) TestSet() {
 		Command:    "",
 		Parameters: validKv,
 	}
-	reply := SmartcontractRegister(request, suite.logger, nil, nil, suite.smList)
+	reply := SmartcontractRegister(request, suite.logger, nil)
 	suite.T().Log(reply.Message)
 	suite.Require().True(reply.IsOK())
 
@@ -163,7 +123,7 @@ func (suite *TestSmartcontractSuite) TestSet() {
 	suite.Require().EqualValues(validRequest, repliedSm)
 
 	// the abi list should have the item
-	smInList, err := suite.smList.Get(repliedSm.SmartcontractKey)
+	smInList, err := suite.smList.Get("")
 	suite.Require().NoError(err)
 	suite.Require().EqualValues(&repliedSm, smInList)
 
@@ -172,7 +132,7 @@ func (suite *TestSmartcontractSuite) TestSet() {
 		Command:    "",
 		Parameters: key_value.Empty(),
 	}
-	reply = SmartcontractRegister(request, suite.logger, nil, nil, suite.smList)
+	reply = SmartcontractRegister(request, suite.logger, nil)
 	suite.Require().False(reply.IsOK())
 
 	// request of abi that already exist in the list
@@ -181,7 +141,7 @@ func (suite *TestSmartcontractSuite) TestSet() {
 		Command:    "",
 		Parameters: validKv,
 	}
-	reply = SmartcontractRegister(request, suite.logger, nil, nil, suite.smList)
+	reply = SmartcontractRegister(request, suite.logger, nil)
 	suite.Require().False(reply.IsOK())
 }
 

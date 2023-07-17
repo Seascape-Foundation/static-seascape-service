@@ -73,8 +73,7 @@ func (suite *TestConfigurationDbSuite) SetupTest() {
 
 	// Creating a database client
 	// after settings the default parameters
-	// we should have the user name and password
-	appConfig.SetDefaults(database.DatabaseConfigurations)
+	// we should have the username and password
 
 	// Overwrite the default parameters to use test container
 	host, err := container.Host(ctx)
@@ -91,9 +90,9 @@ func (suite *TestConfigurationDbSuite) SetupTest() {
 	// wait for initiation of the controller
 	time.Sleep(time.Second * 1)
 
-	database_service, err := parameter.Inprocess("database")
+	databaseService, err := parameter.Inprocess("database")
 	suite.Require().NoError(err)
-	client, err := remote.InprocRequestSocket(database_service.Url(), logger, appConfig)
+	client, err := remote.InprocRequestSocket(databaseService.Url(), logger, appConfig)
 	suite.Require().NoError(err)
 
 	suite.dbCon = client
@@ -101,41 +100,28 @@ func (suite *TestConfigurationDbSuite) SetupTest() {
 	// add the storage abi
 	abiId := "base64="
 	sampleAbi := abi.Abi{
-		Body: []byte("[{}]"),
+		Body: "[{}]",
 		Id:   abiId,
 	}
 	err = sampleAbi.Insert(suite.dbCon)
 	suite.Require().NoError(err)
 
 	// add the storage smartcontract
-	key, _ := smartcontract_key.New("1", "0xaddress")
-	txKey := blockchain.TransactionKey{
-		Id:    "0xtx_id",
-		Index: 0,
-	}
-	header, _ := blockchain.NewHeader(uint64(1), uint64(23))
-	deployer := "0xahmetson"
-
-	sm := smartcontract.Smartcontract{
-		SmartcontractKey: key,
-		AbiId:            abiId,
-		TransactionKey:   txKey,
-		BlockHeader:      header,
-		Deployer:         deployer,
-	}
+	_, _ = smartcontract_key.New("1", "0xaddress")
+	_, _ = blockchain.NewHeader(uint64(1), uint64(23))
+	sm := smartcontract.Smartcontract{}
 	err = sm.Insert(suite.dbCon)
 	suite.Require().NoError(err)
 
 	sample := topic.Topic{
-		Organization:  "seascape",
-		Project:       "sds-core",
-		NetworkId:     "1",
-		Group:         "test-suite",
-		Smartcontract: "TestErc20",
+		Organization: "seascape",
+		Project:      "sds-core",
+		NetworkId:    "1",
+		Group:        "test-suite",
+		Name:         "TestErc20",
 	}
 	suite.configuration = Configuration{
-		Topic:   sample,
-		Address: key.Address,
+		Topic: sample,
 	}
 
 	suite.T().Cleanup(func() {
@@ -164,18 +150,17 @@ func (suite *TestConfigurationDbSuite) TestConfiguration() {
 	suite.Require().EqualValues(suite.configuration, *configs[0])
 
 	// inserting a configuration
-	// that links to the non existing smartcontract
+	// that links to the non-existing smartcontract
 	// should fail
 	sample := topic.Topic{
-		Organization:  "seascape",
-		Project:       "sds-core",
-		NetworkId:     "1",
-		Group:         "test-suite",
-		Smartcontract: "TestToken",
+		Organization: "seascape",
+		Project:      "sds-core",
+		NetworkId:    "1",
+		Group:        "test-suite",
+		Name:         "TestToken",
 	}
 	conf := Configuration{
-		Topic:   sample,
-		Address: "not_inserted",
+		Topic: sample,
 	}
 	err = conf.Insert(suite.dbCon)
 	suite.Require().Error(err)

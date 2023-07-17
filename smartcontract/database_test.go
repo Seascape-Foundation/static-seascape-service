@@ -26,30 +26,30 @@ import (
 // returns the current testing context
 type TestSmartcontractDbSuite struct {
 	suite.Suite
-	db_name       string
+	dbName        string
 	smartcontract Smartcontract
 	container     *mysql.MySQLContainer
-	db_con        *remote.ClientSocket
+	dbCon         *remote.ClientSocket
 	ctx           context.Context
 }
 
 func (suite *TestSmartcontractDbSuite) SetupTest() {
 	// prepare the database creation
-	suite.db_name = "test"
+	suite.dbName = "test"
 	_, filename, _, _ := runtime.Caller(0)
-	storage_abi := "20230308171023_storage_abi.sql"
-	storage_smartcontract := "20230308173919_storage_smartcontract.sql"
-	abi_sql_path := filepath.Join(filepath.Dir(filename), "..", "..", "_db", "migrations", storage_abi)
-	smartcontract_sql_path := filepath.Join(filepath.Dir(filename), "..", "..", "_db", "migrations", storage_smartcontract)
-	suite.T().Log("storage smartcontract sql table path", smartcontract_sql_path)
+	storageAbi := "20230308171023_storage_abi.sql"
+	storageSmartcontract := "20230308173919_storage_smartcontract.sql"
+	abiSqlPath := filepath.Join(filepath.Dir(filename), "..", "..", "_db", "migrations", storageAbi)
+	smartcontractSqlPath := filepath.Join(filepath.Dir(filename), "..", "..", "_db", "migrations", storageSmartcontract)
+	suite.T().Log("storage smartcontract sql table path", smartcontractSqlPath)
 
 	// run the container
 	ctx := context.TODO()
 	container, err := mysql.RunContainer(ctx,
-		mysql.WithDatabase(suite.db_name),
+		mysql.WithDatabase(suite.dbName),
 		mysql.WithUsername("root"),
 		mysql.WithPassword("tiger"),
-		mysql.WithScripts(abi_sql_path, smartcontract_sql_path),
+		mysql.WithScripts(abiSqlPath, smartcontractSqlPath),
 	)
 	suite.Require().NoError(err)
 	suite.container = container
@@ -57,57 +57,43 @@ func (suite *TestSmartcontractDbSuite) SetupTest() {
 
 	logger, err := log.New("mysql-suite", false)
 	suite.Require().NoError(err)
-	app_config, err := configuration.NewAppConfig(logger)
+	appConfig, err := configuration.NewAppConfig(logger)
 	suite.Require().NoError(err)
 
 	// Creating a database client
 	// after settings the default parameters
-	// we should have the user name and password
-	app_config.SetDefaults(db.DatabaseConfigurations)
+	// we should have the username and password
 
 	// Overwrite the default parameters to use test container
 	host, err := container.Host(ctx)
 	suite.Require().NoError(err)
 	ports, err := container.Ports(ctx)
 	suite.Require().NoError(err)
-	exposed_port := ports["3306/tcp"][0].HostPort
+	exposedPort := ports["3306/tcp"][0].HostPort
 
 	db.DatabaseConfigurations.Parameters["SDS_DATABASE_HOST"] = host
-	db.DatabaseConfigurations.Parameters["SDS_DATABASE_PORT"] = exposed_port
-	db.DatabaseConfigurations.Parameters["SDS_DATABASE_NAME"] = suite.db_name
+	db.DatabaseConfigurations.Parameters["SDS_DATABASE_PORT"] = exposedPort
+	db.DatabaseConfigurations.Parameters["SDS_DATABASE_NAME"] = suite.dbName
 
 	// wait for initiation of the controller
 	time.Sleep(time.Second * 1)
 
 	databaseService, err := parameter.Inprocess("db")
 	suite.Require().NoError(err)
-	client, err := remote.InprocRequestSocket(databaseService.Url(), logger, app_config)
+	client, err := remote.InprocRequestSocket(databaseService.Url(), logger, appConfig)
 	suite.Require().NoError(err)
 
-	suite.db_con = client
+	suite.dbCon = client
 
-	key, _ := smartcontract_key.New("1", "0xaddress")
-	abi_id := "base64="
-	tx_key := blockchain.TransactionKey{
-		Id:    "0xtx_id",
-		Index: 0,
-	}
-	header, _ := blockchain.NewHeader(uint64(1), uint64(23))
-	deployer := "0xahmetson"
-
-	suite.smartcontract = Smartcontract{
-		SmartcontractKey: key,
-		AbiId:            abi_id,
-		TransactionKey:   tx_key,
-		BlockHeader:      header,
-		Deployer:         deployer,
-	}
+	_, _ = smartcontract_key.New("1", "0xaddress")
+	_, _ = blockchain.NewHeader(uint64(1), uint64(23))
+	suite.smartcontract = Smartcontract{}
 
 	suite.T().Cleanup(func() {
 		if err := container.Terminate(ctx); err != nil {
 			suite.T().Fatalf("failed to terminate container: %s", err)
 		}
-		if err := suite.db_con.Close(); err != nil {
+		if err := suite.dbCon.Close(); err != nil {
 			suite.T().Fatalf("failed to terminate database connection: %s", err)
 		}
 	})
@@ -115,34 +101,34 @@ func (suite *TestSmartcontractDbSuite) SetupTest() {
 
 func (suite *TestSmartcontractDbSuite) TestSmartcontract() {
 	var smartcontracts []*Smartcontract
-	err := suite.smartcontract.SelectAll(suite.db_con, &smartcontracts)
+	err := suite.smartcontract.SelectAll(suite.dbCon, &smartcontracts)
 	suite.Require().NoError(err)
 	suite.Require().Len(smartcontracts, 0)
 
 	// Insert into the database
 	// it should fail, since the smartcontract depends on the
 	// abi
-	err = suite.smartcontract.Insert(suite.db_con)
+	err = suite.smartcontract.Insert(suite.dbCon)
 	suite.Require().Error(err)
 
-	sample_abi := abi.Abi{
-		Body: []byte("[{}]"),
-		Id:   suite.smartcontract.AbiId,
+	sampleAbi := abi.Abi{
+		Body: "[{}]",
+		Id:   "",
 	}
-	err = sample_abi.Insert(suite.db_con)
+	err = sampleAbi.Insert(suite.dbCon)
 	suite.Require().NoError(err)
 
 	// inserting a smartcontract should be successful
-	err = suite.smartcontract.Insert(suite.db_con)
+	err = suite.smartcontract.Insert(suite.dbCon)
 	suite.Require().NoError(err)
 
 	// duplicate key in the database
 	// it should fail
-	err = suite.smartcontract.Insert(suite.db_con)
+	err = suite.smartcontract.Insert(suite.dbCon)
 	suite.Require().Error(err)
 
 	// all from database
-	err = suite.smartcontract.SelectAll(suite.db_con, &smartcontracts)
+	err = suite.smartcontract.SelectAll(suite.dbCon, &smartcontracts)
 	suite.Require().NoError(err)
 	suite.Require().Len(smartcontracts, 1)
 	suite.Require().EqualValues(suite.smartcontract, *smartcontracts[0])

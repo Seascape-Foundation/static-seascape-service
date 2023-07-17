@@ -18,9 +18,9 @@ import (
 // returns the current testing context
 type TestConfigurationSuite struct {
 	suite.Suite
-	logger    log.Logger
-	conf      configuration.Configuration
-	conf_list *key_value.List
+	logger   log.Logger
+	conf     configuration.Configuration
+	confList *key_value.List
 }
 
 func (suite *TestConfigurationSuite) SetupTest() {
@@ -28,7 +28,7 @@ func (suite *TestConfigurationSuite) SetupTest() {
 	suite.Require().NoError(err)
 	suite.logger = logger
 
-	conf_0 := configuration.Configuration{
+	conf0 := configuration.Configuration{
 		Topic: topic.Topic{
 			Organization: "test_org",
 			Project:      "test_proj",
@@ -37,9 +37,9 @@ func (suite *TestConfigurationSuite) SetupTest() {
 			Name:         "test_name",
 		},
 	}
-	suite.conf = conf_0
+	suite.conf = conf0
 
-	conf_1 := configuration.Configuration{
+	conf1 := configuration.Configuration{
 		Topic: topic.Topic{
 			Organization: "test_org_1",
 			Project:      "test_proj_1",
@@ -50,31 +50,31 @@ func (suite *TestConfigurationSuite) SetupTest() {
 	}
 
 	list := key_value.NewList()
-	err = list.Add(conf_0.Topic, &conf_0)
+	err = list.Add(conf0.Topic, &conf0)
 	suite.Require().NoError(err)
 
-	err = list.Add(conf_1.Topic, &conf_1)
+	err = list.Add(conf1.Topic, &conf1)
 	suite.Require().NoError(err)
-	suite.conf_list = list
+	suite.confList = list
 }
 
 func (suite *TestConfigurationSuite) TestGet() {
 	// valid request
-	valid_kv, err := key_value.NewFromInterface(suite.conf.Topic)
+	validKv, err := key_value.NewFromInterface(suite.conf.Topic)
 	suite.Require().NoError(err)
 
 	request := message.Request{
 		Command:    "",
-		Parameters: valid_kv,
+		Parameters: validKv,
 	}
 	reply := ConfigurationGet(request, suite.logger, nil)
 	suite.Require().True(reply.IsOK())
 
-	var replied_sm GetConfigurationReply
-	err = reply.Parameters.Interface(&replied_sm)
+	var repliedSm GetConfigurationReply
+	err = reply.Parameters.Interface(&repliedSm)
 	suite.Require().NoError(err)
 
-	suite.Require().EqualValues(suite.conf, replied_sm)
+	suite.Require().EqualValues(suite.conf, repliedSm)
 
 	// request with empty parameter should fail
 	request = message.Request{
@@ -87,35 +87,35 @@ func (suite *TestConfigurationSuite) TestGet() {
 	// request of configuration that
 	// doesn't exist in the list
 	// should fail
-	no_topic := topic.Topic{
+	noTopic := topic.Topic{
 		Organization: "test_org_2",
 		Project:      "test_proj_2",
 		NetworkId:    "test_1",
 		Group:        "test_group_2",
 		Name:         "test_name_2",
 	}
-	topic_kv, err := key_value.NewFromInterface(no_topic)
+	topicKv, err := key_value.NewFromInterface(noTopic)
 	suite.Require().NoError(err)
 
 	request = message.Request{
 		Command:    "",
-		Parameters: topic_kv,
+		Parameters: topicKv,
 	}
 	reply = ConfigurationGet(request, suite.logger, nil)
 	suite.Require().False(reply.IsOK())
 
 	// requesting with invalid type for abi id should fail
-	no_topic = topic.Topic{
+	noTopic = topic.Topic{
 		Organization: "test_org_2",
 		Project:      "test_proj_2",
 		NetworkId:    "test_1",
 		Group:        "test_group_2",
 	}
-	topic_kv, err = key_value.NewFromInterface(no_topic)
+	topicKv, err = key_value.NewFromInterface(noTopic)
 	suite.Require().NoError(err)
 	request = message.Request{
 		Command:    "",
-		Parameters: topic_kv,
+		Parameters: topicKv,
 	}
 	reply = ConfigurationGet(request, suite.logger, nil)
 	suite.Require().False(reply.IsOK())
@@ -123,22 +123,22 @@ func (suite *TestConfigurationSuite) TestGet() {
 
 func (suite *TestConfigurationSuite) TestSet() {
 	// valid request
-	no_topic := topic.Topic{
+	noTopic := topic.Topic{
 		Organization: "test_org_2",
 		Project:      "test_proj_2",
 		NetworkId:    "test_1",
 		Group:        "test_group_2",
 		Name:         "test_name_2",
 	}
-	valid_request := configuration.Configuration{
-		Topic: no_topic,
+	validRequest := configuration.Configuration{
+		Topic: noTopic,
 	}
-	valid_kv, err := key_value.NewFromInterface(valid_request)
+	validKv, err := key_value.NewFromInterface(validRequest)
 	suite.Require().NoError(err)
 
 	request := message.Request{
 		Command:    "",
-		Parameters: valid_kv,
+		Parameters: validKv,
 	}
 	reply := ConfigurationRegister(request, suite.logger, nil)
 	suite.T().Log(reply.Message)
@@ -147,12 +147,12 @@ func (suite *TestConfigurationSuite) TestSet() {
 	var repliedSm GetConfigurationReply
 	err = reply.Parameters.Interface(&repliedSm)
 	suite.Require().NoError(err)
-	suite.Require().EqualValues(valid_request, repliedSm)
+	suite.Require().EqualValues(validRequest, repliedSm)
 
 	// the abi list should have the item
-	sm_in_list, err := suite.conf_list.Get(repliedSm)
+	smInList, err := suite.confList.Get(repliedSm)
 	suite.Require().NoError(err)
-	suite.Require().EqualValues(&repliedSm, sm_in_list)
+	suite.Require().EqualValues(&repliedSm, smInList)
 
 	// registering with empty parameter should fail
 	request = message.Request{
@@ -166,7 +166,7 @@ func (suite *TestConfigurationSuite) TestSet() {
 	// should fail
 	request = message.Request{
 		Command:    "",
-		Parameters: valid_kv,
+		Parameters: validKv,
 	}
 	reply = ConfigurationRegister(request, suite.logger, nil)
 	suite.Require().False(reply.IsOK())

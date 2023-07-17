@@ -20,22 +20,9 @@ type TestSmartcontractSuite struct {
 }
 
 func (suite *TestSmartcontractSuite) SetupTest() {
-	key, _ := smartcontract_key.New("1", "0xaddress")
-	abi_id := "base64="
-	tx_key := blockchain.TransactionKey{
-		Id:    "0xtx_id",
-		Index: 0,
-	}
-	header, _ := blockchain.NewHeader(uint64(1), uint64(23))
-	deployer := "0xahmetson"
-
-	suite.smartcontract = Smartcontract{
-		SmartcontractKey: key,
-		AbiId:            abi_id,
-		TransactionKey:   tx_key,
-		BlockHeader:      header,
-		Deployer:         deployer,
-	}
+	_, _ = smartcontract_key.New("1", "0xaddress")
+	_, _ = blockchain.NewHeader(uint64(1), uint64(23))
+	suite.smartcontract = Smartcontract{}
 }
 
 func (suite *TestSmartcontractSuite) TestNew() {
@@ -48,8 +35,8 @@ func (suite *TestSmartcontractSuite) TestNew() {
 	// creating a new smartcontract with the exact type
 	// should be successful
 	key, _ := smartcontract_key.New("1", "0xaddress")
-	abi_id := "base64="
-	tx_key := blockchain.TransactionKey{
+	abiId := "base64="
+	txKey := blockchain.TransactionKey{
 		Id:    "0xtx_id",
 		Index: 0,
 	}
@@ -57,8 +44,8 @@ func (suite *TestSmartcontractSuite) TestNew() {
 	deployer := "0xahmetson"
 	kv = key_value.Empty().
 		Set("key", key).
-		Set("abi_id", abi_id).
-		Set("transaction_key", tx_key).
+		Set("abi_id", abiId).
+		Set("transaction_key", txKey).
 		Set("block_header", header).
 		Set("deployer", deployer)
 
@@ -69,11 +56,11 @@ func (suite *TestSmartcontractSuite) TestNew() {
 	// creating a smartcontract with the missing data
 	// should fail.
 	// In this case Transaction key's Topic is missing
-	tx_key = blockchain.TransactionKey{Index: 0}
+	txKey = blockchain.TransactionKey{Index: 0}
 	kv = key_value.Empty().
 		Set("key", key).
-		Set("abi_id", abi_id).
-		Set("transaction_key", tx_key).
+		Set("abi_id", abiId).
+		Set("transaction_key", txKey).
 		Set("block_header", header).
 		Set("deployer", deployer)
 	_, err = New(kv)

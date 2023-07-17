@@ -19,18 +19,16 @@ type TestConfigurationSuite struct {
 }
 
 func (suite *TestConfigurationSuite) SetupTest() {
-	address := "0xaddress"
 	sample := topic.Topic{
-		Organization:  "seascape",
-		Project:       "sds-core",
-		NetworkId:     "1",
-		Group:         "test-suite",
-		Smartcontract: "TestErc20",
+		Organization: "seascape",
+		Project:      "sds-core",
+		NetworkId:    "1",
+		Group:        "test-suite",
+		Name:         "TestErc20",
 	}
 
 	suite.configuration = Configuration{
-		Topic:   sample,
-		Address: address,
+		Topic: sample,
 	}
 }
 
@@ -44,12 +42,11 @@ func (suite *TestConfigurationSuite) TestNew() {
 	// topic is not on smartcontract level
 	address := "0xaddress"
 	sample := topic.Topic{
-		Organization:  "seascape",
-		Project:       "sds-core",
-		NetworkId:     "1",
-		Group:         "test-suite",
-		Smartcontract: "TestErc20",
-		Event:         "Transfer",
+		Organization: "seascape",
+		Project:      "sds-core",
+		NetworkId:    "1",
+		Group:        "test-suite",
+		Name:         "TestErc20",
 	}
 	kv = key_value.Empty().
 		Set("topic", sample).
@@ -59,10 +56,10 @@ func (suite *TestConfigurationSuite) TestNew() {
 
 	// topic is not valid no level
 	sample = topic.Topic{
-		Organization:  "seascape",
-		Project:       "sds-core",
-		NetworkId:     "1",
-		Smartcontract: "TestErc20",
+		Organization: "seascape",
+		Project:      "sds-core",
+		NetworkId:    "1",
+		Name:         "TestErc20",
 	}
 	kv = key_value.Empty().
 		Set("topic", sample).
@@ -85,11 +82,11 @@ func (suite *TestConfigurationSuite) TestNew() {
 
 	// invalid address
 	sample = topic.Topic{
-		Organization:  "seascape",
-		Project:       "sds-core",
-		NetworkId:     "1",
-		Group:         "test-suite",
-		Smartcontract: "TestErc20",
+		Organization: "seascape",
+		Project:      "sds-core",
+		NetworkId:    "1",
+		Group:        "test-suite",
+		Name:         "TestErc20",
 	}
 	kv = key_value.Empty().
 		Set("topic", sample).
@@ -97,9 +94,9 @@ func (suite *TestConfigurationSuite) TestNew() {
 	_, err = New(kv)
 	suite.Require().Error(err)
 
-	topic_conf, err := NewFromTopic(sample, address)
+	topicConf, err := NewFromTopic(sample, nil)
 	suite.Require().NoError(err)
-	suite.Require().EqualValues(suite.configuration, *topic_conf)
+	suite.Require().EqualValues(suite.configuration, *topicConf)
 }
 
 // In order for 'go test' to run this suite, we need to create
