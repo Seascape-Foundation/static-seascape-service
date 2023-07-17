@@ -2,10 +2,9 @@ package abi
 
 import (
 	"fmt"
-
-	"github.com/Seascape-Foundation/mysql-seascape-extension/handler"
 	"github.com/ahmetson/common-lib/data_type"
 	"github.com/ahmetson/common-lib/data_type/key_value"
+	databaseExtension "github.com/ahmetson/service-lib/extension/database"
 	"github.com/ahmetson/service-lib/remote"
 )
 
@@ -14,16 +13,16 @@ import (
 // Implements common/data_type/database.Crud interface
 func (a *Abi) Insert(dbInterface interface{}) error {
 	db := dbInterface.(*remote.ClientSocket)
-	request := handler.DatabaseQueryRequest{
+	request := databaseExtension.QueryRequest{
 		Fields:    []string{"abi_id", "body"},
 		Tables:    []string{"abi"},
 		Arguments: []interface{}{a.Id, data_type.AddJsonPrefix([]byte(a.Body))},
 	}
-	var reply handler.InsertReply
+	var reply databaseExtension.InsertReply
 
-	err := handler.INSERT.Request(db, request, &reply)
+	err := databaseExtension.Insert.Request(db, request, &reply)
 	if err != nil {
-		return fmt.Errorf("handler.INSERT.Request: %w", err)
+		return fmt.Errorf("databaseExtension.Insert.Request: %w", err)
 	}
 	return nil
 }
@@ -38,15 +37,15 @@ func (a *Abi) SelectAll(dbInterface interface{}, returnValues interface{}) error
 		return fmt.Errorf("return_values.(*[]*Abi)")
 	}
 
-	request := handler.DatabaseQueryRequest{
+	request := databaseExtension.QueryRequest{
 		Fields: []string{"abi_id as id", "body as bytes"},
 		Tables: []string{"storage_abi"},
 	}
-	var reply handler.SelectAllReply
+	var reply databaseExtension.SelectAllReply
 
-	err := handler.SelectAll.Request(dbClient, request, &reply)
+	err := databaseExtension.SelectAll.Request(dbClient, request, &reply)
 	if err != nil {
-		return fmt.Errorf("handler.SELECT_ALL.Push: %w", err)
+		return fmt.Errorf("databaseExtension.SELECT_ALL.Push: %w", err)
 	}
 	*abis = make([]*Abi, len(reply.Rows))
 
@@ -69,16 +68,16 @@ func (a *Abi) SelectAll(dbInterface interface{}, returnValues interface{}) error
 func (a *Abi) Select(dbInterface interface{}) error {
 	dbClient := dbInterface.(*remote.ClientSocket)
 
-	request := handler.DatabaseQueryRequest{
+	request := databaseExtension.QueryRequest{
 		Where:     "abi_id=?",
 		Tables:    []string{"abi"},
 		Arguments: []interface{}{a.Id},
 	}
-	var reply handler.SelectRowReply
+	var reply databaseExtension.SelectRowReply
 
-	err := handler.SelectRow.Request(dbClient, request, &reply)
+	err := databaseExtension.SelectRow.Request(dbClient, request, &reply)
 	if err != nil {
-		return fmt.Errorf("handler.SELECT_ROW.Push: %w", err)
+		return fmt.Errorf("databaseExtension.SELECT_ROW.Push: %w", err)
 	}
 
 	abi, err := New(reply.Outputs)

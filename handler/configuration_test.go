@@ -30,25 +30,23 @@ func (suite *TestConfigurationSuite) SetupTest() {
 
 	conf_0 := configuration.Configuration{
 		Topic: topic.Topic{
-			Organization:  "test_org",
-			Project:       "test_proj",
-			NetworkId:     "test_1",
-			Group:         "test_group",
-			Smartcontract: "test_name",
+			Organization: "test_org",
+			Project:      "test_proj",
+			NetworkId:    "test_1",
+			Group:        "test_group",
+			Name:         "test_name",
 		},
-		Address: "0xaddress",
 	}
 	suite.conf = conf_0
 
 	conf_1 := configuration.Configuration{
 		Topic: topic.Topic{
-			Organization:  "test_org_1",
-			Project:       "test_proj_1",
-			NetworkId:     "test_1",
-			Group:         "test_group_1",
-			Smartcontract: "test_name_1",
+			Organization: "test_org_1",
+			Project:      "test_proj_1",
+			NetworkId:    "test_1",
+			Group:        "test_group_1",
+			Name:         "test_name_1",
 		},
-		Address: "0xaddress",
 	}
 
 	list := key_value.NewList()
@@ -69,7 +67,7 @@ func (suite *TestConfigurationSuite) TestGet() {
 		Command:    "",
 		Parameters: valid_kv,
 	}
-	reply := ConfigurationGet(request, suite.logger, nil, nil, nil, suite.conf_list)
+	reply := ConfigurationGet(request, suite.logger, nil)
 	suite.Require().True(reply.IsOK())
 
 	var replied_sm GetConfigurationReply
@@ -83,18 +81,18 @@ func (suite *TestConfigurationSuite) TestGet() {
 		Command:    "",
 		Parameters: key_value.Empty(),
 	}
-	reply = ConfigurationGet(request, suite.logger, nil, nil, nil, suite.conf_list)
+	reply = ConfigurationGet(request, suite.logger, nil)
 	suite.Require().False(reply.IsOK())
 
 	// request of configuration that
 	// doesn't exist in the list
 	// should fail
 	no_topic := topic.Topic{
-		Organization:  "test_org_2",
-		Project:       "test_proj_2",
-		NetworkId:     "test_1",
-		Group:         "test_group_2",
-		Smartcontract: "test_name_2",
+		Organization: "test_org_2",
+		Project:      "test_proj_2",
+		NetworkId:    "test_1",
+		Group:        "test_group_2",
+		Name:         "test_name_2",
 	}
 	topic_kv, err := key_value.NewFromInterface(no_topic)
 	suite.Require().NoError(err)
@@ -103,7 +101,7 @@ func (suite *TestConfigurationSuite) TestGet() {
 		Command:    "",
 		Parameters: topic_kv,
 	}
-	reply = ConfigurationGet(request, suite.logger, nil, nil, nil, suite.conf_list)
+	reply = ConfigurationGet(request, suite.logger, nil)
 	suite.Require().False(reply.IsOK())
 
 	// requesting with invalid type for abi id should fail
@@ -119,22 +117,21 @@ func (suite *TestConfigurationSuite) TestGet() {
 		Command:    "",
 		Parameters: topic_kv,
 	}
-	reply = ConfigurationGet(request, suite.logger, nil, nil, nil, suite.conf_list)
+	reply = ConfigurationGet(request, suite.logger, nil)
 	suite.Require().False(reply.IsOK())
 }
 
 func (suite *TestConfigurationSuite) TestSet() {
 	// valid request
 	no_topic := topic.Topic{
-		Organization:  "test_org_2",
-		Project:       "test_proj_2",
-		NetworkId:     "test_1",
-		Group:         "test_group_2",
-		Smartcontract: "test_name_2",
+		Organization: "test_org_2",
+		Project:      "test_proj_2",
+		NetworkId:    "test_1",
+		Group:        "test_group_2",
+		Name:         "test_name_2",
 	}
 	valid_request := configuration.Configuration{
-		Topic:   no_topic,
-		Address: "0xaddress_3",
+		Topic: no_topic,
 	}
 	valid_kv, err := key_value.NewFromInterface(valid_request)
 	suite.Require().NoError(err)
@@ -143,7 +140,7 @@ func (suite *TestConfigurationSuite) TestSet() {
 		Command:    "",
 		Parameters: valid_kv,
 	}
-	reply := ConfigurationRegister(request, suite.logger, nil, nil, nil, suite.conf_list)
+	reply := ConfigurationRegister(request, suite.logger, nil)
 	suite.T().Log(reply.Message)
 	suite.Require().True(reply.IsOK())
 
@@ -162,7 +159,7 @@ func (suite *TestConfigurationSuite) TestSet() {
 		Command:    "",
 		Parameters: key_value.Empty(),
 	}
-	reply = ConfigurationRegister(request, suite.logger, nil, nil, nil, suite.conf_list)
+	reply = ConfigurationRegister(request, suite.logger, nil)
 	suite.Require().False(reply.IsOK())
 
 	// registering of abi that already exist in the list
@@ -171,7 +168,7 @@ func (suite *TestConfigurationSuite) TestSet() {
 		Command:    "",
 		Parameters: valid_kv,
 	}
-	reply = ConfigurationRegister(request, suite.logger, nil, nil, nil, suite.conf_list)
+	reply = ConfigurationRegister(request, suite.logger, nil)
 	suite.Require().False(reply.IsOK())
 }
 

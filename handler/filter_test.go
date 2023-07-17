@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/ahmetson/common-lib/data_type/key_value"
-	"github.com/ahmetson/common-lib/smartcontract_key"
 	"github.com/ahmetson/common-lib/topic"
 	"github.com/ahmetson/service-lib/log"
 	"github.com/ahmetson/static-service/configuration"
@@ -37,63 +36,42 @@ func (suite *TestFilterSuite) SetupTest() {
 	suite.Require().NoError(err)
 	suite.logger = logger
 
-	sm0 := smartcontract.Smartcontract{
-		SmartcontractKey: smartcontract_key.Key{
-			NetworkId: "test_1",
-			Address:   "0xaddr_0",
-		},
-		AbiId: "abi",
-	}
+	sm0 := smartcontract.Smartcontract{}
 	suite.sm = sm0
 
-	sm1 := smartcontract.Smartcontract{
-		SmartcontractKey: smartcontract_key.Key{
-			NetworkId: "test_1",
-			Address:   "0xaddr_1",
-		},
-		AbiId: "abi",
-	}
+	sm1 := smartcontract.Smartcontract{}
 
-	sm2 := smartcontract.Smartcontract{
-		SmartcontractKey: smartcontract_key.Key{
-			NetworkId: "test_2",
-			Address:   "0xaddr_2",
-		},
-		AbiId: "abi",
-	}
+	sm2 := smartcontract.Smartcontract{}
 
 	conf0 := configuration.Configuration{
 		Topic: topic.Topic{
-			Organization:  "test_org",
-			Project:       "test_proj",
-			NetworkId:     "test_1",
-			Group:         "test_group",
-			Smartcontract: "test_name",
+			Organization: "test_org",
+			Project:      "test_proj",
+			NetworkId:    "test_1",
+			Group:        "test_group",
+			Name:         "test_name",
 		},
-		Address: "0xaddr_0",
 	}
 	suite.conf = conf0
 
 	conf1 := configuration.Configuration{
 		Topic: topic.Topic{
-			Organization:  "test_org_1",
-			Project:       "test_proj_1",
-			NetworkId:     "test_1",
-			Group:         "test_group_1",
-			Smartcontract: "test_name_1",
+			Organization: "test_org_1",
+			Project:      "test_proj_1",
+			NetworkId:    "test_1",
+			Group:        "test_group_1",
+			Name:         "test_name_1",
 		},
-		Address: "0xaddr_1",
 	}
 
 	conf2 := configuration.Configuration{
 		Topic: topic.Topic{
-			Organization:  "test_org",
-			Project:       "test_proj_2",
-			NetworkId:     "test_2",
-			Group:         "test_group_2",
-			Smartcontract: "test_name_2",
+			Organization: "test_org",
+			Project:      "test_proj_2",
+			NetworkId:    "test_2",
+			Group:        "test_group_2",
+			Name:         "test_name_2",
 		},
-		Address: "0xaddr_2",
 	}
 
 	list := key_value.NewList()
@@ -109,13 +87,13 @@ func (suite *TestFilterSuite) SetupTest() {
 	suite.confList = list
 
 	smList := key_value.NewList()
-	err = smList.Add(sm0.SmartcontractKey, &sm0)
+	err = smList.Add("sm0", &sm0)
 	suite.Require().NoError(err)
 
-	err = smList.Add(sm1.SmartcontractKey, &sm1)
+	err = smList.Add("sm1", &sm1)
 	suite.Require().NoError(err)
 
-	err = smList.Add(sm2.SmartcontractKey, &sm2)
+	err = smList.Add("sm2", &sm2)
 	suite.Require().NoError(err)
 
 	suite.smList = smList
@@ -220,7 +198,7 @@ func (suite *TestFilterSuite) TestSmartcontractFiltering() {
 	filteredSm, filteredTopics, err := filterSmartcontract(newList, suite.smList)
 	suite.Require().NoError(err)
 	suite.Require().NotEmpty(filteredSm)
-	suite.Require().EqualValues(suite.conf.Topic.String(topic.SmartcontractLevel), filteredTopics[0])
+	suite.Require().EqualValues(suite.conf.Topic.Id(), filteredTopics[0])
 }
 
 // In order for 'go test' to run this suite, we need to create
