@@ -16,10 +16,6 @@ const (
 	GetConfiguration command.Name = "configuration_get"
 	// SetConfiguration Through the router
 	SetConfiguration command.Name = "configuration_set"
-	// FilterSmartcontracts Direct
-	FilterSmartcontracts command.Name = "smartcontract_filter"
-	// FilterSmartcontractKeys Through the router
-	FilterSmartcontractKeys command.Name = "smartcontract_key_filter"
 	// SetSmartcontract Through the router
 	SetSmartcontract command.Name = "smartcontract_set"
 	// GetSmartcontract Direct
@@ -32,8 +28,6 @@ func RegisterCommands(c *controller.Controller) {
 	c.RegisterCommand(SetAbi, AbiRegister)
 	c.RegisterCommand(GetSmartcontract, SmartcontractGet)
 	c.RegisterCommand(SetSmartcontract, SmartcontractRegister)
-	//c.RegisterCommand(FilterSmartcontracts, SmartcontractFilter)
-	//c.RegisterCommand(FilterSmartcontractKeys, SmartcontractKeyFilter)
 	c.RegisterCommand(GetConfiguration, ConfigurationGet)
 	c.RegisterCommand(SetConfiguration, ConfigurationRegister)
 }
