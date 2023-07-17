@@ -11,8 +11,8 @@ import (
 // Note that you should set the address as well
 func NewFromTopic(id topic.Topic, smartcontracts []topic.Topic) (*Configuration, error) {
 	c := &Configuration{
-		Id:             id,
-		Smartcontracts: smartcontracts,
+		Topic:  id,
+		Topics: smartcontracts,
 	}
 	if err := c.Validate(); err != nil {
 		return nil, fmt.Errorf("validate: %w", err)

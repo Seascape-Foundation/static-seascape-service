@@ -68,7 +68,7 @@ func (suite *TestSmartcontractSuite) TestNew() {
 
 	// creating a smartcontract with the missing data
 	// should fail.
-	// In this case Transaction key's Id is missing
+	// In this case Transaction key's Topic is missing
 	tx_key = blockchain.TransactionKey{Index: 0}
 	kv = key_value.Empty().
 		Set("key", key).

@@ -42,7 +42,7 @@ func filterOrganization(configurations *key_value.List, paths []string) *key_val
 		conf := value.(*configuration.Configuration)
 
 		for _, path := range paths {
-			if conf.Id.Organization == path {
+			if conf.Topic.Organization == path {
 				_ = filtered.Add(key, value)
 				break
 			}
@@ -67,7 +67,7 @@ func filterProject(configurations *key_value.List, paths []string) *key_value.Li
 		conf := value.(*configuration.Configuration)
 
 		for _, path := range paths {
-			if conf.Id.Project == path {
+			if conf.Topic.Project == path {
 				_ = filtered.Add(key, value)
 				break
 			}
@@ -92,7 +92,7 @@ func filterNetworkId(configurations *key_value.List, paths []string) *key_value.
 		conf := value.(*configuration.Configuration)
 
 		for _, path := range paths {
-			if conf.Id.NetworkId == path {
+			if conf.Topic.NetworkId == path {
 				_ = filtered.Add(key, value)
 				break
 			}
@@ -117,7 +117,7 @@ func filterGroup(configurations *key_value.List, paths []string) *key_value.List
 		conf := value.(*configuration.Configuration)
 
 		for _, path := range paths {
-			if conf.Id.Group == path {
+			if conf.Topic.Group == path {
 				_ = filtered.Add(key, value)
 				break
 			}
@@ -142,7 +142,7 @@ func filterSmartcontractName(configurations *key_value.List, paths []string) *ke
 		conf := value.(*configuration.Configuration)
 
 		for _, path := range paths {
-			if conf.Id.Name == path {
+			if conf.Topic.Name == path {
 				_ = filtered.Add(key, value)
 				break
 			}
@@ -195,7 +195,7 @@ func filterSmartcontract(
 	topicStrings := make([]topic.Id, 0)
 
 	for _, conf := range configurations {
-		key, err := smartcontract_key.New(conf.Id.NetworkId, conf.Smartcontracts[0].Name)
+		key, err := smartcontract_key.New(conf.Topic.NetworkId, conf.Topics[0].Name)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to create smartcontract key: %w", err)
 		}
@@ -208,7 +208,7 @@ func filterSmartcontract(
 		sm := value.(*smartcontract.Smartcontract)
 
 		smartcontracts = append(smartcontracts, sm)
-		topicStrings = append(topicStrings, conf.Id.Id())
+		topicStrings = append(topicStrings, conf.Topic.Id())
 	}
 
 	return smartcontracts, topicStrings, nil

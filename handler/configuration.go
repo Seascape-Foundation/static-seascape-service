@@ -61,7 +61,7 @@ func ConfigurationGet(request message.Request, _ log.Logger, clients remote.Clie
 	dbCon := remote.GetClient(clients, "database")
 
 	var selectedConf = configuration.Configuration{
-		Id: confTopic,
+		Topic: confTopic,
 	}
 	err = selectedConf.Select(dbCon)
 	if err != nil {

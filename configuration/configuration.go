@@ -12,22 +12,22 @@ import (
 //
 // The database part depends on the Storage Smartcontract
 type Configuration struct {
-	Id             topic.Topic   `json:"id"`
-	Smartcontracts []topic.Topic `json:"smartcontract"`
+	Topic  topic.Topic   `json:"topic"`
+	Topics []topic.Topic `json:"topics"`
 }
 
 func (c *Configuration) Validate() error {
-	if err := c.Id.Validate(); err != nil {
+	if err := c.Topic.Validate(); err != nil {
 		return fmt.Errorf("Topic.Validate: %w", err)
 	}
-	if !c.Id.Has("org", "proj") {
+	if !c.Topic.Has("org", "proj") {
 		return fmt.Errorf("topic id should missing org or proj")
 	}
-	if len(c.Smartcontracts) == 0 {
+	if len(c.Topics) == 0 {
 		return fmt.Errorf("missing Address parameter")
 	}
 
-	for _, topicId := range c.Smartcontracts {
+	for _, topicId := range c.Topics {
 		if !topicId.Has("org", "net", "name") {
 			return fmt.Errorf("smartcontract is missing org, net and name")
 		}
