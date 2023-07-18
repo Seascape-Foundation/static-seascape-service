@@ -21,28 +21,12 @@ func New(kv key_value.KeyValue) (*Abi, error) {
 	} else {
 		abi.Id = id
 	}
-	bytes, err := kv.GetString("body")
+	body, err := kv.GetString("body")
 	if err != nil {
 		return nil, fmt.Errorf("key_value.GetString(bytes): %w", err)
 	}
 
-	fmt.Println("bytes", bytes)
-
-	if len(bytes) == 0 {
-		return nil, fmt.Errorf("missing `bytes` parameter")
-	}
-	unPrefixed := data_type.DecodeJsonPrefixed(bytes)
-	if len(unPrefixed) == 0 {
-		return nil, fmt.Errorf("parameter `bytes` is not a json prefixed string")
-	}
-	abi.Body = unPrefixed
-
-	fmt.Println("un-prefixed", unPrefixed)
-
-	//if err := abi.formatBytes(); err != nil {
-	//	return nil, fmt.Errorf("format_bytes: %w", err)
-	//}
-	fmt.Println("abi body after serialization", abi.Body)
+	abi.Body = body
 
 	return &abi, nil
 }

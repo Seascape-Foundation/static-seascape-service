@@ -2,7 +2,6 @@ package abi
 
 import (
 	"fmt"
-	"github.com/ahmetson/common-lib/data_type"
 	"github.com/ahmetson/common-lib/data_type/key_value"
 	databaseExtension "github.com/ahmetson/service-lib/extension/database"
 	"github.com/ahmetson/service-lib/remote"
@@ -16,7 +15,7 @@ func (a *Abi) Insert(dbInterface interface{}) error {
 	request := databaseExtension.QueryRequest{
 		Fields:    []string{"abi_id", "body"},
 		Tables:    []string{"abi"},
-		Arguments: []interface{}{a.Id, data_type.AddJsonPrefix([]byte(a.Body))},
+		Arguments: []interface{}{a.Id, a.Body},
 	}
 	var reply databaseExtension.InsertReply
 
@@ -39,7 +38,7 @@ func (a *Abi) SelectAll(dbInterface interface{}, returnValues interface{}) error
 
 	request := databaseExtension.QueryRequest{
 		Fields: []string{"abi_id as id", "body as bytes"},
-		Tables: []string{"storage_abi"},
+		Tables: []string{"abi"},
 	}
 	var reply databaseExtension.SelectAllReply
 
