@@ -16,6 +16,7 @@ func (sm *Smartcontract) Insert(dbInterface interface{}) error {
 	db := dbInterface.(*remote.ClientSocket)
 	request := databaseExtension.QueryRequest{
 		Fields: []string{
+			"id",
 			"topic",
 			"transaction_id",
 			"owner",
@@ -24,7 +25,8 @@ func (sm *Smartcontract) Insert(dbInterface interface{}) error {
 		},
 		Tables: []string{"smartcontract"},
 		Arguments: []interface{}{
-			sm.Topic.Id(),
+			sm.Topic.Id().Only("org", "net", "name"),
+			sm.Topic,
 			sm.TransactionId,
 			sm.Owner,
 			sm.Verifier,
