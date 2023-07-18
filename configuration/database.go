@@ -26,7 +26,7 @@ func (c *Configuration) Insert(dbInterface interface{}) error {
 	request := databaseExtension.QueryRequest{
 		Fields:    []string{"id", "smartcontracts"},
 		Tables:    []string{"configuration"},
-		Arguments: []interface{}{c.Topic.Id(), ids},
+		Arguments: []interface{}{c.Topic.Id().Only("org", "proj"), ids},
 	}
 	var reply databaseExtension.InsertReply
 
