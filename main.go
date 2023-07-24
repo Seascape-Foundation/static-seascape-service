@@ -9,45 +9,14 @@ import (
 )
 
 func main() {
-	/////////////////////////////////////////////////////////////////
-	//
-	// Initiating the data for our service
-	//
-	//////////////////////////////////////////////////////////////////
-	logger, err := log.New("main", true)
+	logger, err := log.New("static", true)
 	if err != nil {
 		logger.Fatal("log.New(`main`)", "error", err)
 	}
 
-	logger.Info("load app configuration begin...")
-	appConfig, err := configuration.NewAppConfig(logger)
+	appConfig, err := configuration.New(logger)
 	if err != nil {
 		logger.Fatal("configuration.NewAppConfig", "error", err)
-	}
-	logger.Info("load app configuration end!")
-
-	//
-	// Validations
-	//
-	if len(appConfig.Services) == 0 {
-		logger.Fatal("no seascape.yml or the yaml file doesn't contain services")
-	}
-
-	logger.Info("for quick development, we assume the seascape.yml has one controller, service and extension")
-	serviceConfig := appConfig.Services[0]
-	if serviceConfig.Type != configuration.IndependentType {
-		logger.Fatal("first service in seascape.yml is not an independent type", "type", serviceConfig.Type)
-	}
-	if len(serviceConfig.Controllers) == 0 {
-		logger.Fatal("first service in seascape.yml doesn't contain controllers")
-	}
-	controllerConfig := serviceConfig.Controllers[0]
-	if controllerConfig.Type != configuration.ReplierType {
-		logger.Fatal("the first controller is not a replier",
-			"service name", serviceConfig.Name,
-			"controller name", controllerConfig.Name,
-			"controller type", controllerConfig.Type,
-		)
 	}
 
 	/////////////////////////////////////////////////////////////////////////
@@ -60,18 +29,22 @@ func main() {
 	if err != nil {
 		logger.Fatal("failed to create a controller", "error", err)
 	}
-	// add to replier the commands
-	handler.RegisterCommands(replier)
 	// prepare the dependencies that controller needs
-	replier.RequireExtension("database")
 
-	service, err := independent.New(appConfig.Services[0])
+	replier.RequireExtension("github.com/ahmetson/w3storage-extension")
+	// add to replier the commands
+	handler.RegisterCommands(replier, "github.com/ahmetson/w3storage-extension")
+
+	service, err := independent.New(appConfig, logger)
 	if err != nil {
 		logger.Fatal("failed to create an independent service", "error", err)
 	}
-	err = service.AddController("main", replier)
+	service.AddController("main", replier)
+	service.RequireProxy("github.com/ahmetson/web-proxy", configuration.DefaultContext)
+
+	err = service.Prepare(configuration.IndependentType)
 	if err != nil {
-		logger.Fatal("failed to add controller into the independent service", "error", err)
+		logger.Fatal("service.Prepare", "error", err)
 	}
 
 	service.Run()

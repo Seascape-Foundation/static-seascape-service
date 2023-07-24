@@ -32,13 +32,19 @@ func (sm *Smartcontract) Insert(dbInterface interface{}) error {
 			sm.Verifier,
 			sm.Specific,
 		},
-	}
+	}.Request(databaseExtension.Insert)
 	var reply databaseExtension.InsertReply
 
-	err := databaseExtension.Insert.Request(db, request, &reply)
+	parameters, err := db.RequestRemoteService(&request)
 	if err != nil {
 		return fmt.Errorf("databaseExtension.INSERT.Request: %w", err)
 	}
+
+	err = parameters.Interface(&reply)
+	if err != nil {
+		return fmt.Errorf("failed to parse reply: %w", err)
+	}
+
 	return nil
 }
 
@@ -62,12 +68,17 @@ func (sm *Smartcontract) SelectAll(dbInterface interface{}, returnValues interfa
 			"specific",
 		},
 		Tables: []string{"smartcontract"},
-	}
-	var reply databaseExtension.SelectAllReply
+	}.Request(databaseExtension.SelectAll)
 
-	err := databaseExtension.SelectAll.Request(db, request, &reply)
+	parameters, err := db.RequestRemoteService(&request)
 	if err != nil {
 		return fmt.Errorf("databaseExtension.SELECT_ALL.Request: %w", err)
+	}
+
+	var reply databaseExtension.SelectAllReply
+	err = parameters.Interface(&reply)
+	if err != nil {
+		return fmt.Errorf("failed to parse reply")
 	}
 
 	*smartcontracts = make([]*Smartcontract, len(reply.Rows))

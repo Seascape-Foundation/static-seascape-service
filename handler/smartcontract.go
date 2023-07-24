@@ -20,7 +20,7 @@ type GetSmartcontractReply = smartcontract.Smartcontract
 // SmartcontractRegister Register a new smartcontract. It means we are adding smartcontract parameters into
 // smartcontract database table.
 // Requires abi_id parameter. First call abi_register method first.
-func SmartcontractRegister(request message.Request, _ log.Logger, clients remote.Clients) message.Reply {
+func SmartcontractRegister(request message.Request, _ *log.Logger, extensions ...*remote.ClientSocket) message.Reply {
 	var sm SetSmartcontractRequest
 	err := request.Parameters.Interface(&sm)
 	if err != nil {
@@ -36,7 +36,10 @@ func SmartcontractRegister(request message.Request, _ log.Logger, clients remote
 		return message.Fail("failed to reply")
 	}
 
-	dbCon := remote.GetClient(clients, "database")
+	dbCon := remote.FindClient(extensions, "github.com/ahmetson/w3storage-extension")
+	if dbCon == nil {
+		return message.Fail("missing extension")
+	}
 
 	var crud database.Crud = &sm
 	if err = crud.Insert(dbCon); err != nil {
@@ -47,7 +50,7 @@ func SmartcontractRegister(request message.Request, _ log.Logger, clients remote
 }
 
 // SmartcontractGet Returns configuration and smartcontract information related to the configuration
-var SmartcontractGet = func(request message.Request, _ log.Logger, clients remote.Clients) message.Reply {
+var SmartcontractGet = func(request message.Request, _ *log.Logger, extensions ...*remote.ClientSocket) message.Reply {
 	var key GetSmartcontractRequest
 	err := request.Parameters.Interface(&key)
 	if err != nil {
@@ -57,8 +60,10 @@ var SmartcontractGet = func(request message.Request, _ log.Logger, clients remot
 		return message.Fail("key.Validate: " + err.Error())
 	}
 
-	dbCon := remote.GetClient(clients, "database")
-
+	dbCon := remote.FindClient(extensions, "github.com/ahmetson/w3storage-extension")
+	if dbCon == nil {
+		return message.Fail("missing extension")
+	}
 	var selected = smartcontract.Smartcontract{}
 	err = selected.Select(dbCon)
 	if err != nil {

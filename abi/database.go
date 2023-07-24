@@ -16,13 +16,18 @@ func (a *Abi) Insert(dbInterface interface{}) error {
 		Fields:    []string{"abi_id", "body"},
 		Tables:    []string{"abi"},
 		Arguments: []interface{}{a.Id, a.Body},
-	}
-	var reply databaseExtension.InsertReply
+	}.Request(databaseExtension.Insert)
 
-	err := databaseExtension.Insert.Request(db, request, &reply)
+	parameters, err := db.RequestRemoteService(&request)
 	if err != nil {
 		return fmt.Errorf("databaseExtension.Insert.Request: %w", err)
 	}
+	var reply databaseExtension.InsertReply
+	err = parameters.Interface(&reply)
+	if err != nil {
+		return fmt.Errorf("failed to parse reply: %w", err)
+	}
+
 	return nil
 }
 
@@ -39,13 +44,18 @@ func (a *Abi) SelectAll(dbInterface interface{}, returnValues interface{}) error
 	request := databaseExtension.QueryRequest{
 		Fields: []string{"abi_id as id", "body as bytes"},
 		Tables: []string{"abi"},
-	}
-	var reply databaseExtension.SelectAllReply
+	}.Request(databaseExtension.SelectAll)
 
-	err := databaseExtension.SelectAll.Request(dbClient, request, &reply)
+	replyParameters, err := dbClient.RequestRemoteService(&request)
 	if err != nil {
 		return fmt.Errorf("databaseExtension.SELECT_ALL.Push: %w", err)
 	}
+	var reply databaseExtension.SelectAllReply
+	err = replyParameters.Interface(&reply)
+	if err != nil {
+		return fmt.Errorf("failed to parse: %w", err)
+	}
+
 	*abis = make([]*Abi, len(reply.Rows))
 
 	// Loop through rows, using Scan to assign column data to struct fields.
@@ -71,12 +81,17 @@ func (a *Abi) Select(dbInterface interface{}) error {
 		Where:     "abi_id=?",
 		Tables:    []string{"abi"},
 		Arguments: []interface{}{a.Id},
-	}
-	var reply databaseExtension.SelectRowReply
+	}.Request(databaseExtension.SelectRow)
 
-	err := databaseExtension.SelectRow.Request(dbClient, request, &reply)
+	parameters, err := dbClient.RequestRemoteService(&request)
 	if err != nil {
 		return fmt.Errorf("databaseExtension.SELECT_ROW.Push: %w", err)
+	}
+
+	var reply databaseExtension.SelectRowReply
+	err = parameters.Interface(&reply)
+	if err != nil {
+		return fmt.Errorf("failed to parse reply: %w", err)
 	}
 
 	abi, err := New(reply.Outputs)

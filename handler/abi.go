@@ -22,8 +22,9 @@ type SetAbiReply = abi.Abi
 
 // AbiGet returns the abi
 // Depends on the database extension
-var AbiGet = func(request message.Request, _ log.Logger, extensions remote.Clients) message.Reply {
-	if !remote.ClientExist(extensions, "database") {
+var AbiGet = func(request message.Request, _ *log.Logger, extensions ...*remote.ClientSocket) message.Reply {
+	dbCon := remote.FindClient(extensions, "github.com/ahmetson/w3storage-extension")
+	if dbCon == nil {
 		return message.Fail("missing extension")
 	}
 
@@ -36,7 +37,6 @@ var AbiGet = func(request message.Request, _ log.Logger, extensions remote.Clien
 		return message.Fail("missing abi id")
 	}
 
-	dbCon := remote.GetClient(extensions, "database")
 	var selectedAbi = abi.Abi{Id: reqParameters.Id}
 	saveErr := selectedAbi.Select(dbCon)
 	if saveErr != nil {
@@ -50,8 +50,9 @@ var AbiGet = func(request message.Request, _ log.Logger, extensions remote.Clien
 	return replyMessage
 }
 
-func AbiRegister(request message.Request, _ log.Logger, extensions remote.Clients) message.Reply {
-	if !remote.ClientExist(extensions, "database") {
+func AbiRegister(request message.Request, _ *log.Logger, extensions ...*remote.ClientSocket) message.Reply {
+	dbCon := remote.FindClient(extensions, "github.com/ahmetson/w3storage-extension")
+	if dbCon == nil {
 		return message.Fail("missing extension")
 	}
 
@@ -78,7 +79,6 @@ func AbiRegister(request message.Request, _ log.Logger, extensions remote.Client
 		return message.Fail("failed to reply")
 	}
 
-	dbCon := remote.GetClient(extensions, "database")
 	var crud database.Crud = newAbi
 	saveErr := crud.Insert(dbCon)
 	if saveErr != nil {

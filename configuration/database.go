@@ -27,13 +27,19 @@ func (c *Configuration) Insert(dbInterface interface{}) error {
 		Fields:    []string{"id", "smartcontracts"},
 		Tables:    []string{"configuration"},
 		Arguments: []interface{}{c.Topic.Id().Only("org", "proj"), ids},
-	}
-	var reply databaseExtension.InsertReply
+	}.Request(databaseExtension.Insert)
 
-	err := databaseExtension.Insert.Request(db, request, &reply)
+	kv, err := db.RequestRemoteService(&request)
 	if err != nil {
 		return fmt.Errorf("databaseExtension.INSERT.Request: %w", err)
 	}
+
+	var reply databaseExtension.InsertReply
+	err = kv.Interface(&reply)
+	if err != nil {
+		return fmt.Errorf("invalid reply: %w", err)
+	}
+
 	return nil
 }
 
@@ -54,12 +60,16 @@ func (c *Configuration) SelectAll(dbInterface interface{}, returnValues interfac
 			"smartcontracts",
 		},
 		Tables: []string{"configuration"},
-	}
-	var reply databaseExtension.SelectAllReply
+	}.Request(databaseExtension.SelectAll)
 
-	err := databaseExtension.SelectAll.Request(db, request, &reply)
+	replyParameters, err := db.RequestRemoteService(&request)
 	if err != nil {
 		return fmt.Errorf("databaseExtension.SELECT_ALL.Request: %w", err)
+	}
+	var reply databaseExtension.SelectAllReply
+	err = replyParameters.Interface(&reply)
+	if err != nil {
+		return fmt.Errorf("failed to parse reply: %w", err)
 	}
 
 	*configurations = make([]*Configuration, len(reply.Rows))

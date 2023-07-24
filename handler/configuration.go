@@ -19,7 +19,7 @@ type SetConfigurationReply = configuration.Configuration
 
 // ConfigurationRegister Register a new smartcontract in the configuration.
 // It requires smartcontract address. First call smartcontract_register command.
-var ConfigurationRegister = func(request message.Request, _ log.Logger, clients remote.Clients) message.Reply {
+var ConfigurationRegister = func(request message.Request, _ *log.Logger, extensions ...*remote.ClientSocket) message.Reply {
 	var conf SetConfigurationRequest
 	err := request.Parameters.Interface(&conf)
 	if err != nil {
@@ -29,7 +29,10 @@ var ConfigurationRegister = func(request message.Request, _ log.Logger, clients 
 		return message.Fail("validation: " + err.Error())
 	}
 
-	dbCon := remote.GetClient(clients, "database")
+	dbCon := remote.FindClient(extensions, "github.com/ahmetson/w3storage-extension")
+	if dbCon == nil {
+		return message.Fail("missing extension")
+	}
 	var crud database.Crud = &conf
 	if err = crud.Insert(dbCon); err != nil {
 		return message.Fail("Configuration saving in the database failed: " + err.Error())
@@ -45,7 +48,7 @@ var ConfigurationRegister = func(request message.Request, _ log.Logger, clients 
 }
 
 // ConfigurationGet Returns configuration and smartcontract information related to the configuration
-func ConfigurationGet(request message.Request, _ log.Logger, clients remote.Clients) message.Reply {
+func ConfigurationGet(request message.Request, _ *log.Logger, extensions ...*remote.ClientSocket) message.Reply {
 	var confTopic GetConfigurationRequest
 	err := request.Parameters.Interface(&confTopic)
 	if err != nil {
@@ -58,7 +61,10 @@ func ConfigurationGet(request message.Request, _ log.Logger, clients remote.Clie
 		return message.Fail("missing org or proj property in the topic")
 	}
 
-	dbCon := remote.GetClient(clients, "database")
+	dbCon := remote.FindClient(extensions, "github.com/ahmetson/w3storage-extension")
+	if dbCon == nil {
+		return message.Fail("missing extension")
+	}
 
 	var selectedConf = configuration.Configuration{
 		Topic: confTopic,

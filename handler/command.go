@@ -9,25 +9,32 @@ import (
 
 const (
 	// GetAbi Direct
-	GetAbi command.Name = "abi_get"
+	GetAbi string = "abi_get"
 	// SetAbi Through the router
-	SetAbi command.Name = "abi_set"
+	SetAbi string = "abi_set"
 	// GetConfiguration Through the router
-	GetConfiguration command.Name = "configuration_get"
+	GetConfiguration string = "configuration_get"
 	// SetConfiguration Through the router
-	SetConfiguration command.Name = "configuration_set"
+	SetConfiguration string = "configuration_set"
 	// SetSmartcontract Through the router
-	SetSmartcontract command.Name = "smartcontract_set"
+	SetSmartcontract string = "smartcontract_set"
 	// GetSmartcontract Direct
-	GetSmartcontract command.Name = "smartcontract_get"
+	GetSmartcontract string = "smartcontract_get"
 )
 
 // RegisterCommands registers the commands and their handlers in the controller
-func RegisterCommands(c *controller.Controller) {
-	c.RegisterCommand(GetAbi, AbiGet)
-	c.RegisterCommand(SetAbi, AbiRegister)
-	c.RegisterCommand(GetSmartcontract, SmartcontractGet)
-	c.RegisterCommand(SetSmartcontract, SmartcontractRegister)
-	c.RegisterCommand(GetConfiguration, ConfigurationGet)
-	c.RegisterCommand(SetConfiguration, ConfigurationRegister)
+func RegisterCommands(c *controller.Controller, extensions ...string) {
+	abiGet := command.NewRoute(GetAbi, AbiGet, extensions...)
+	abiSet := command.NewRoute(SetAbi, AbiRegister, extensions...)
+	smartcontractGet := command.NewRoute(GetSmartcontract, SmartcontractGet, extensions...)
+	smartcontractSet := command.NewRoute(SetSmartcontract, SmartcontractRegister, extensions...)
+	configurationGet := command.NewRoute(GetConfiguration, ConfigurationGet, extensions...)
+	configurationSet := command.NewRoute(SetConfiguration, ConfigurationRegister, extensions...)
+
+	c.AddRoute(abiGet)
+	c.AddRoute(abiSet)
+	c.AddRoute(smartcontractGet)
+	c.AddRoute(smartcontractSet)
+	c.AddRoute(configurationGet)
+	c.AddRoute(configurationSet)
 }
