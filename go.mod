@@ -2,6 +2,9 @@ module github.com/ahmetson/static-service
 
 go 1.19
 
+replace github.com/ahmetson/service-lib => D:/sds/service-lib
+
+replace github.com/ahmetson/common-lib => D:/sds/common-lib
 
 require (
 	github.com/Seascape-Foundation/mysql-seascape-extension v0.0.0-20230708233037-dbd5d31707b4
